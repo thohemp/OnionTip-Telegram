@@ -1,4 +1,4 @@
-## oniontip - Bitcoin Cash tipbot for Telegram
+## OnionTip - DeepOnion tipbot for Telegram
 _This is a fork of [PandaTip-Telegram](https://github.com/DarthJahus/PandaTip-Telegram), a Pandacoin tipbot for Telegram, by [@DarthJahus](https://github.com/DarthJahus)._ 
 
 ### Dependencies 
