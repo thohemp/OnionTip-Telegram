@@ -42,7 +42,7 @@ Create a `config.json` **JSON** file and set up the following parameters:
 
 ### Deeponion daemon configuration
 
-A `Deeponion.conf` file is needed in data directory.
+A `DeepOnion.conf` file is needed in data directory.
 
 (sample)
 
