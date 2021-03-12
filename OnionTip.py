@@ -1,17 +1,15 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 #coding=utf-8
 
 
 import emoji
-from telegram.ext import Updater
-from telegram.ext import CommandHandler, CallbackQueryHandler
-from telegram import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import CommandHandler, CallbackQueryHandler, Updater, CallbackContext
+from telegram import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup, Update
 from BitcoinRPC import BitcoinRPC, Wrapper as RPCWrapper
 from HelperFunctions import *
 import logging
-logging.basicConfig(
-	format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-	level=logging.INFO
+logging.basicConfig(level=logging.CRITICAL,
+	format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 import time
 from datetime import datetime
@@ -27,9 +25,9 @@ _spam_filter = AntiSpamFilter(config["spam_filter"][0], config["spam_filter"][1]
 __wallet_rpc = RPCWrapper(BitcoinRPC(config["rpc-uri"], (config["rpc-user"], config["rpc-psw"])))
 __fee_std = 0.000010
 __units = {
-	"parent_name": "BCH",
+	"parent_name": "ONION",
 	"parent_format": "%.4f",
-	"name": "bits",
+	"name": "mOnion",
 	"symbol": u"\u20bf",
 	"multiplier": 0.000001,
 	"multiplier_threshold": 0.01
@@ -44,18 +42,19 @@ __minconf = 0  # See issue #4 (https://github.com/DarthJahus/oniontip-Telegram/i
 
 
 # ToDo: Don't forget to write the strings in strings.json (they are actually empty)
-def cmd_start(bot, update, args):
+def cmd_start(update: Update, context : CallbackContext):
 	"""Reacts when /start is sent to the bot."""
 	if update.effective_chat.type == "private":
 		if not _spam_filter.verify(str(update.effective_user.id)):
 			return
 		# Check for deep link
-		if len(args) > 0:
-			if args[0].lower() == "about":
-				cmd_about(bot, update)
-			elif args[0].lower() == "help":
+		bot = context.bot
+		if len(context.args) > 0:
+			if context.args[0].lower() == "about":
+				cmd_about(context, update)
+			elif context.args[0].lower() == "help":
 				cmd_help(bot, update)
-			elif args[0].lower() == "address":
+			elif context.args[0].lower() == "address":
 				deposit(bot, update)
 			else:
 				update.message.reply_text(
@@ -87,7 +86,7 @@ def cmd_start(bot, update, args):
 			)
 
 
-def cmd_about(bot, update):
+def cmd_about(update: Update, context : CallbackContext):
 	if not _spam_filter.verify(str(update.effective_user.id)):
 		return
 	if update.effective_chat is None:
@@ -97,6 +96,7 @@ def cmd_about(bot, update):
 	else:
 		_chat_type = "group"
 	#
+	bot = context.bot
 	if _chat_type == "private":
 		# Check if callback
 		try:
@@ -137,7 +137,7 @@ def cmd_about(bot, update):
 	return True
 
 
-def cmd_help(bot, update):
+def cmd_help(update: Update, context : CallbackContext):
 	if not _spam_filter.verify(str(update.effective_user.id)):
 		return
 	if update.effective_chat is None:
@@ -147,6 +147,7 @@ def cmd_help(bot, update):
 	else:
 		_chat_type = "group"
 	#
+	bot = context.bot
 	if _chat_type == "private":
 		# Check if callback
 		try:
@@ -187,7 +188,8 @@ def cmd_help(bot, update):
 	return True
 
 
-def msg_no_account(bot, update):
+def msg_no_account(update: Update, context : CallbackContext):
+	bot = context.bot
 	_button = InlineKeyboardButton(
 		text=emoji.emojize(strings.get("user_no_address_button", _lang), use_aliases=True),
 		url="https://telegram.me/%s?start=address" % bot.username
@@ -203,7 +205,7 @@ def msg_no_account(bot, update):
 	)
 
 
-def deposit(bot, update):
+def deposit(update: Update, context : CallbackContext):
 	"""
 	This commands works only in private.
 	If the user has no address, a new account is created with his Telegram user ID (str)
@@ -265,7 +267,7 @@ def deposit(bot, update):
 # Done: Give balance only if a private chat (2018-07-15)
 # Done: Remove WorldCoinIndex (2018-07-15)
 # ToDo: Add conversion
-def balance(bot, update):
+def balance(update: Update, context : CallbackContext):
 	if update.effective_chat is None:
 		_chat_type = "private"
 	elif update.effective_chat.type == "private":
@@ -324,7 +326,7 @@ def balance(bot, update):
 
 # Done: Rewrite the whole logic; use tags instead of parsing usernames (2018-07-15)
 # Done: Allow private tipping if the user can be tagged (@username available) (Nothing to add for it to work.)
-def tip(bot, update, args):
+def tip(update: Update, context : CallbackContext, args):
 	"""
 	/tip <user> <amount>
 	/tip u1 u2 u3 ... v1 v2 v3 ...
@@ -525,7 +527,7 @@ def tip(bot, update, args):
 
 
 # Done: Revamp withdraw() function (2018-07-16)
-def withdraw(bot, update, args):
+def withdraw(update: Update, context : CallbackContext, args):
 	"""
 	Withdraw to an address. Works only in private.
 	"""
@@ -621,7 +623,7 @@ def withdraw(bot, update, args):
 								)
 
 
-def scavenge(bot, update):
+def scavenge(update: Update, context : CallbackContext):
 	if update.effective_chat is None:
 		_chat_type = "private"
 	elif update.effective_chat.type == "private":
@@ -745,12 +747,13 @@ def convert_satoshi(amount):
 		return "%s %s" % (__units["parent_format"] % amount, __units["parent_name"])
 
 
-def cmd_send_log(bot, update):
+def cmd_send_log(update: Update, context : CallbackContext):
 	"""
 	Send logs to (admin) user
 	"""
 	# Note: Don't use emoji in caption
 	# Check if admin
+	bot = context.bot
 	if update.effective_chat.id in config["admins"]:
 		with open("log.csv", "rb") as _file:
 			_file_name = "%s-log-%s.csv" % (bot.username, datetime.fromtimestamp(time.time()).strftime("%Y-%m-%dT%H-%M-%S"))
@@ -764,13 +767,13 @@ def cmd_send_log(bot, update):
 		log(fun="cmd_send_log", user=str(update.effective_user.id), message="Log sent to admin '%s'." % update.effective_user.name)
 
 
-def cmd_clear_log(bot, update):
+def cmd_clear_log(update: Update, context : CallbackContext):
 	if update.effective_chat in config["admins"]:
 		clear_log()
 		update.message.reply_text(text=emoji.emojize(strings.get("clear_log_done"), use_aliases=True))
 
 
-def cmd_pause(bot, update):
+def cmd_pause(update: Update, context : CallbackContext):
 	# Admins only
 	if update.effective_chat.id in config["admins"]:
 		global _paused
@@ -786,26 +789,27 @@ def cmd_pause(bot, update):
 # ToDo: Revamp functions bellow
 
 
-def price(bot, update):
+def price(update: Update, context : CallbackContext):
 	pass
 
 
-def marketcap(bot, update):
+def marketcap(update: Update, context : CallbackContext):
 	pass
 
 
-def hi(bot, update):
+def hi(update: Update, context : CallbackContext):
+	bot = context.bot
 	if not _spam_filter.verify(str(update.effective_user.id)):
 		return  # ToDo: Return a message?
 	user = update.message.from_user.username
 	bot.send_message(chat_id=update.message.chat_id, text="Hello @{0}, how are you doing today?".format(user))
 
 
-def moon(bot, update):
+def moon(update: Update, context : CallbackContext):
 	update.message.reply_text(text="Moon mission inbound!")
 
 
-def market_cap(bot, update):
+def market_cap(update: Update, context : CallbackContext):
 	pass
 
 
