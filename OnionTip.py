@@ -8,7 +8,7 @@ from telegram import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup, Upda
 from BitcoinRPC import BitcoinRPC, Wrapper as RPCWrapper
 from HelperFunctions import *
 import logging
-logging.basicConfig(level=logging.CRITICAL,
+logging.basicConfig(level=logging.INFO,
 	format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 import time
@@ -23,18 +23,18 @@ _spam_filter = AntiSpamFilter(config["spam_filter"][0], config["spam_filter"][1]
 
 # Constants
 __wallet_rpc = RPCWrapper(BitcoinRPC(config["rpc-uri"], (config["rpc-user"], config["rpc-psw"])))
-__fee_std = 0.000010
+__fee_std = 0.00010
 __units = {
 	"parent_name": "ONION",
 	"parent_format": "%.4f",
-	"name": "mOnion",
-	"symbol": u"\u20bf",
-	"multiplier": 0.000001,
+	"name": "mONION",
+	"symbol": "mONION",
+	"multiplier": 1,
 	"multiplier_threshold": 0.01
 }
 __rpc_getbalance_account = True  # If True, use getbalance <account>, else use getbalance <address>
 __rpc_sendmany_account = False   # If False, use sendmany <source_account> {"address": amount}, else {"account": amount}
-__blockchain_explorer_tx = "https://blockchair.com/bitcoin-cash/transaction/"
+__blockchain_explorer_tx = "https://explorer.deeponion.org/tx/"
 __minconf = 0  # See issue #4 (https://github.com/DarthJahus/oniontip-Telegram/issues/4)
 
 
@@ -123,7 +123,7 @@ def cmd_about(update: Update, context : CallbackContext):
 		# Done: Button (2018-07-18)
 		_button = InlineKeyboardButton(
 			text=emoji.emojize(strings.get("button_about", _lang), use_aliases=True),
-			url="https://telegram.me/%s?start=about" % bot.username
+			url="https://telegram.me/%s?start=about" % context.bot.username
 		)
 		_markup = InlineKeyboardMarkup(
 			[[_button]]
@@ -174,7 +174,7 @@ def cmd_help(update: Update, context : CallbackContext):
 		# Done: Button (2018-07-18)
 		_button = InlineKeyboardButton(
 			text=emoji.emojize(strings.get("button_help", _lang), use_aliases=True),
-			url="https://telegram.me/%s?start=help" % bot.username
+			url="https://telegram.me/%s?start=help" % context.bot.username
 		)
 		_markup = InlineKeyboardMarkup(
 			[[_button]]
@@ -189,10 +189,9 @@ def cmd_help(update: Update, context : CallbackContext):
 
 
 def msg_no_account(update: Update, context : CallbackContext):
-	bot = context.bot
 	_button = InlineKeyboardButton(
 		text=emoji.emojize(strings.get("user_no_address_button", _lang), use_aliases=True),
-		url="https://telegram.me/%s?start=address" % bot.username
+		url="https://telegram.me/%s?start=address" % context.bot.username
 	)
 	_markup = InlineKeyboardMarkup(
 		[[_button]]
@@ -299,7 +298,7 @@ def balance(update: Update, context : CallbackContext):
 			_addresses = _rpc_call["result"]["result"]
 			if len(_addresses) == 0:
 				# User has no address, ask him to create one
-				msg_no_account(bot, update)
+				msg_no_account(context.bot, update)
 			else:
 				# ToDo: Handle the case when user has many addresses?
 				# Maybe if something really weird happens and user ends up having more, we can calculate his balance.
@@ -326,13 +325,13 @@ def balance(update: Update, context : CallbackContext):
 
 # Done: Rewrite the whole logic; use tags instead of parsing usernames (2018-07-15)
 # Done: Allow private tipping if the user can be tagged (@username available) (Nothing to add for it to work.)
-def tip(update: Update, context : CallbackContext, args):
+def tip(update: Update, context : CallbackContext):
 	"""
 	/tip <user> <amount>
 	/tip u1 u2 u3 ... v1 v2 v3 ...
 	/tip u1 v1 u2 v2 u3 v3 ...
 	"""
-	if len(args) == 0:
+	if len(context.args) == 0:
 		return
 	if not _spam_filter.verify(str(update.effective_user.id)):
 		return  # ToDo: Return a message?
@@ -403,9 +402,10 @@ def tip(update: Update, context : CallbackContext, args):
 			log("tip", _user_id, "(1) getaddressesbyaccount > Error: %s" % _rpc_call["result"]["error"])
 		else:
 			_addresses = _rpc_call["result"]["result"]
+			print(_addresses)
 			if len(_addresses) == 0:
 				# User has no address, ask him to create one
-				msg_no_account(bot, update)
+				msg_no_account(context.bot, update)
 			else:
 				_address = _addresses[0]
 				# Get user's balance
@@ -436,6 +436,7 @@ def tip(update: Update, context : CallbackContext, args):
 						i = 0
 						_tip_dict_addresses = {}
 						_tip_dict_accounts = {}
+						print(len(_recipients))
 						for _recipient in _recipients:
 							# add "or _recipient == bot.id" to disallow tipping the tip bot
 							if _recipient == _user_id:
@@ -493,8 +494,10 @@ def tip(update: Update, context : CallbackContext, args):
 						else:
 							_tip_dict = _tip_dict_addresses
 						# Check if there are users left to tip
+						print(len(_tip_dict))
 						if len(_tip_dict) == 0:
 							return
+						
 						# Done: replace .move by .sendfrom or .sendmany (2018-07-16) 
 						# sendfrom <from address or account> <receive address or account> <amount> [minconf=1] [comment] [comment-to]
 						# and
@@ -741,11 +744,11 @@ def convert_to_int(text):
 
 
 def convert_satoshi(amount):
-	if amount < __units["multiplier_threshold"]:
-		return "%i %s" % (amount/__units["multiplier"], __units["symbol"])
-	else:
-		return "%s %s" % (__units["parent_format"] % amount, __units["parent_name"])
-
+	#if amount < __units["multiplier_threshold"]:
+	#	return "%i %s" % (amount/__units["multiplier"], __units["symbol"])
+	#else:
+	#	return "%s %s" % (__units["parent_format"] % amount, __units["parent_name"])
+	return "%i %s " % (amount, __units["parent_name"])
 
 def cmd_send_log(update: Update, context : CallbackContext):
 	"""
@@ -756,8 +759,8 @@ def cmd_send_log(update: Update, context : CallbackContext):
 	bot = context.bot
 	if update.effective_chat.id in config["admins"]:
 		with open("log.csv", "rb") as _file:
-			_file_name = "%s-log-%s.csv" % (bot.username, datetime.fromtimestamp(time.time()).strftime("%Y-%m-%dT%H-%M-%S"))
-			bot.sendDocument(
+			_file_name = "%s-log-%s.csv" % (contex.tbot.username, datetime.fromtimestamp(time.time()).strftime("%Y-%m-%dT%H-%M-%S"))
+			context.bot.sendDocument(
 				chat_id=update.effective_user.id,
 				document=_file,
 				reply_to_message_id=update.message.message_id,
