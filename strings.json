@@ -1,7 +1,7 @@
 {
 	"welcome": {
 		"en": [
-			":sparkle: Hi! This is a tipbot for Bitcoin Cash.",
+			":sparkle: Hi! This is a tipbot for DeepOnion.",
 			"You can use it to share bits with your friends."
 		]
 	},
@@ -22,8 +22,8 @@
 			"Use `/withdraw <address> <amount>`",
 			"Please double check your address before submitting, as we cannot undo that process.",
 			"",
-			":bulb: This bot uses \"bits\" (shown as B) instead of bitcoins (BCH).",
-			"`1 bit = 0.000001 BCH`",
+			":bulb: This bot uses \"mONIONs\" (shown as B) instead of Onions (ONIONS).",
+			"`1 mONIONs = 0.000001 ONION`",
 			"",
 			"",
 			"Need more advanced help and usage tricks?",
@@ -37,7 +37,7 @@
 	},
 	"button_help_advanced_url": {
 		"en": [
-			"https://github.com/DarthJahus/oniontip-Telegram/wiki/Usage-and-tricks-%5BEnglish%5D"
+			"https://deeponion.org"
 		]
 	},
 	"help_public": {
@@ -57,8 +57,8 @@
 	},
 	"about": {
 		"en": [
-			"This is a tipbot for Bitcoin Cash.",
-			"Made by [@DarthJahus](https://github.com/DarthJahus/oniontip-Telegram)"
+			"This is a tipbot for DeepOnion.",
+			"Made by [@thohemp](https://github.com/thohemp/OnionTip-Telegram)"
 		]
 	},
 	"about_public": {
