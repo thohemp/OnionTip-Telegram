@@ -494,7 +494,6 @@ def tip(update: Update, context : CallbackContext):
 						else:
 							_tip_dict = _tip_dict_addresses
 						# Check if there are users left to tip
-						print(len(_tip_dict))
 						if len(_tip_dict) == 0:
 							return
 						
@@ -530,7 +529,7 @@ def tip(update: Update, context : CallbackContext):
 
 
 # Done: Revamp withdraw() function (2018-07-16)
-def withdraw(update: Update, context : CallbackContext, args):
+def withdraw(update: Update, context : CallbackContext):
 	"""
 	Withdraw to an address. Works only in private.
 	"""
@@ -549,14 +548,14 @@ def withdraw(update: Update, context : CallbackContext, args):
 			return
 		_amount = None
 		_recipient = None
-		if len(args) == 2:
+		if len(context.args) == 2:
 			try:
-				_amount = round(int(args[1]) * __units["multiplier"], 8)
-				_recipient = args[0]
+				_amount = round(int(context.args[1]) * __units["multiplier"], 8)
+				_recipient = context.args[0]
 			except:
 				try:
-					_amount = round(int(args[0]) * __units["multiplier"], 8)
-					_recipient = args[1]
+					_amount = round(int(context.args[0]) * __units["multiplier"], 8)
+					_recipient = context.args[1]
 				except:
 					pass
 		else:
@@ -582,7 +581,7 @@ def withdraw(update: Update, context : CallbackContext, args):
 				_addresses = _rpc_call["result"]["result"]
 				if len(_addresses) == 0:
 					# User has no address, ask him to create one
-					msg_no_account(bot, update)
+					msg_no_account(context.bot, update)
 				else:
 					_address = _addresses[0]
 					if __rpc_getbalance_account:
