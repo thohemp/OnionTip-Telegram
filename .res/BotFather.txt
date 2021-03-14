@@ -1,9 +1,9 @@
 /setdescription
-This bot allows you to receive, store and send Onion on Telegram.
+This bot allows you to receive, store and send ONIONS on Telegram.
 
-💰 To get started, create a deposit address or ask a friend to send you some pandas.
+💰 To get started, create a deposit address or ask a friend to send you some ONIONS.
 
-💁 Once you have some Onion, share them with your friends.
+💁 Once you have some ONIONS, share them with your friends.
 
 🌐  You can withdraw your bits at any time.
 
@@ -20,7 +20,7 @@ balance -Show your balance
 tip - <user> <amount> - Send amount to another user
 withdraw - <address> <amount> - Withdraw your funds to an address
 address -Get your deposit address
-scavenge -Migrate your account (ask admin)
+scavenge - Migrate your account (ask admin)
 about -Information about this bot
 help -Get help about this bot
 
