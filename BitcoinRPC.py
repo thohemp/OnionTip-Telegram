@@ -16,7 +16,7 @@ class MethodMissing:
 		return partial(self.method_missing, name)
 
 
-class Wrapper(object, MethodMissing):
+class Wrapper(MethodMissing):
 	def __init__(self, item):
 		self.item = item
 
@@ -73,7 +73,7 @@ def main():
 	# getaccountaddress creates an address if account doesn't exist.
 	# warning, getaccountaddress will create a new address for the account if its current address has been used
 	# use getaddressesbyaccount instead
-	res = myBitcoin.getaddressesbyaccount("@arasdawn")
+	res = myBitcoin.getaddressesbyaccount("@obszoenling")
 	if not res["success"]:
 		print("Error: %s" % res["message"])
 	else:
@@ -82,14 +82,14 @@ def main():
 		else:
 			print(json.dumps(res["result"]["result"]))
 	return
-	res = myBitcoin.sendmany("oniontip", {"@jahus": 0.00005, "1234": 0.00006})
-	if not res["success"]:
-		print("Error: %s" % res["message"])
-	else:
-		if res["result"]["error"] is not None:
-			print("Error: %s" % res["result"]["error"])
-		else:
-			print(json.dumps(res["result"]["result"]))
+	#res = myBitcoin.sendmany("oniontip", {"@jahus": 0.00005, "1234": 0.00006})
+	#if not res["success"]:
+	#	print("Error: %s" % res["message"])
+	#else:
+	#	if res["result"]["error"] is not None:
+	#		print("Error: %s" % res["result"]["error"])
+	#	else:
+	#		print(json.dumps(res["result"]["result"]))
 
 
 if __name__ == "__main__":
