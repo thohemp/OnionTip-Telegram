@@ -1,0 +1,29 @@
+# sudo cp ./oniontip.service /lib/systemd/system/oniontip.service
+# sudo chmod 644 /lib/systemd/system/oniontip.service
+# Don't forget #!/usr/bin/python
+# chmod +x ./OnionTip.py
+# systemctl daemon-reload
+# systemctl enable oniontip.service
+# systemctl start oniontip.service
+# Status:
+# systemctl status oniontip.service
+# To stop:
+# systemctl stop oniontip.service
+# To remove
+# systemctl disable oniontip.service
+
+[Unit]
+Description=oniontipbot
+After=syslog.target
+After=network.target
+After=bitcoind.service
+
+[Service]
+Type=simple
+ExecStart=/bitcoin/oniontip-telegram/OnionTip.py
+WorkingDirectory=/bitcoin/oniontip-telegram/
+Restart=always
+RestartSec=600
+
+[Install]
+WantedBy=multi-user.target
