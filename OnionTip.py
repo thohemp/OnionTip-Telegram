@@ -188,10 +188,11 @@ def cmd_help(update: Update, context : CallbackContext):
 	return True
 
 
-def msg_no_account(update: Update, context : CallbackContext):
+def msg_no_account(update: Update, context: CallbackContext):
+	bot = context.bot
 	_button = InlineKeyboardButton(
 		text=emoji.emojize(strings.get("user_no_address_button", _lang), use_aliases=True),
-		url="https://telegram.me/%s?start=address" % context.bot.username
+		url="https://telegram.me/%s?start=address" % bot.username
 	)
 	_markup = InlineKeyboardMarkup(
 		[[_button]]
@@ -298,7 +299,7 @@ def balance(update: Update, context : CallbackContext):
 			_addresses = _rpc_call["result"]["result"]
 			if len(_addresses) == 0:
 				# User has no address, ask him to create one
-				msg_no_account(context.bot, update)
+				msg_no_account(update, context)
 			else:
 				# ToDo: Handle the case when user has many addresses?
 				# Maybe if something really weird happens and user ends up having more, we can calculate his balance.
@@ -325,7 +326,7 @@ def balance(update: Update, context : CallbackContext):
 
 # Done: Rewrite the whole logic; use tags instead of parsing usernames (2018-07-15)
 # Done: Allow private tipping if the user can be tagged (@username available) (Nothing to add for it to work.)
-def tip(update: Update, context : CallbackContext):
+def tip(update: Update, context: CallbackContext):
 	"""
 	/tip <user> <amount>
 	/tip u1 u2 u3 ... v1 v2 v3 ...
@@ -405,7 +406,7 @@ def tip(update: Update, context : CallbackContext):
 			print(_addresses)
 			if len(_addresses) == 0:
 				# User has no address, ask him to create one
-				msg_no_account(context.bot, update)
+				msg_no_account(update, context)
 			else:
 				_address = _addresses[0]
 				# Get user's balance
