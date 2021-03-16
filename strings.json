@@ -100,6 +100,11 @@
 			"Your balance is:"
 		]
 	},
+	"user_balance_public": {
+		"en": [
+			"Psst, the people here are so curious. Let's talk in private chat."
+		]
+	},
 	"tip_no_funds": {
 		"en": [
 			"Sorry, you don't have enough funds for this operation.",
