@@ -6,7 +6,7 @@ from datetime import datetime
 import time
 import emoji
 from telegram.ext import CommandHandler, CallbackQueryHandler, Updater, CallbackContext
-from telegram import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup, Update, KeyboardButton, ReplyKeyboardMarkup
 from BitcoinRPC import BitcoinRPC, Wrapper as RPCWrapper
 from HelperFunctions import *
 import logging
@@ -53,7 +53,6 @@ def cmd_start(update: Update, context: CallbackContext):
         if not _spam_filter.verify(str(update.effective_user.id)):
             return
         # Check for deep link
-        bot = context.bot
         if len(context.args) > 0:
             if context.args[0].lower() == "about":
                 cmd_about(update, context)
@@ -69,19 +68,43 @@ def cmd_start(update: Update, context: CallbackContext):
                     disable_web_page_preview=True
                 )
         else:
-            _button_help = InlineKeyboardButton(
+            _button_balance = KeyboardButton(
+                text=emoji.emojize(strings.get(
+                    "button_balance", _lang), use_aliases=True),
+                callback_data="balance"
+            )
+            _button_deposit = KeyboardButton(
+                text=emoji.emojize(strings.get(
+                    "button_deposit", _lang), use_aliases=True),
+                callback_data="deposit"
+            )
+
+            _button_withdraw = KeyboardButton(
+                text=emoji.emojize(strings.get(
+                    "button_withdraw", _lang), use_aliases=True),
+                callback_data="withdraw"
+            )
+
+            _button_send = KeyboardButton(
+                text=emoji.emojize(strings.get(
+                    "button_send", _lang), use_aliases=True),
+                callback_data="tip"
+            )
+
+            _button_help = KeyboardButton(
                 text=emoji.emojize(strings.get(
                     "button_help", _lang), use_aliases=True),
                 callback_data="help"
             )
-            _button_about = InlineKeyboardButton(
+            _button_about = KeyboardButton(
                 text=emoji.emojize(strings.get(
                     "button_about", _lang), use_aliases=True),
                 callback_data="about"
             )
-            _markup = InlineKeyboardMarkup(
+            _markup = ReplyKeyboardMarkup(
                 [
-                    [_button_help, _button_about]
+                    [_button_balance, _button_deposit, _button_withdraw],
+                    [_button_send, _button_help, _button_about]
                 ]
             )
             update.message.reply_text(
@@ -231,7 +254,7 @@ def deposit(update: Update, context: CallbackContext):
     else:
         _chat_type = "group"
         update.message.reply_text(text=emoji.emojize(strings.get(
-        "user_balance_public"), use_aliases=True), quote=True)
+            "user_balance_public"), use_aliases=True), quote=True)
 
     # Only show deposit address if it's a private conversation with the bot
     if _chat_type == "private":

@@ -49,7 +49,27 @@
 	},
 	"button_help": {
 		"en": [
-			":robot_face: HELP"
+			":robot_face: Help"
+		]
+	},
+	"button_balance": {
+		"en": [
+			":moneybag: Balance"
+		]
+	},
+	"button_deposit": {
+		"en": [
+			":inbox_tray: Deposit"
+		]
+	},
+	"button_withdraw": {
+		"en": [
+			":outbox_tray: Withdraw"
+		]
+	},
+	"button_send": {
+		"en": [
+			":zap: Send"
 		]
 	},
 	"about": {
@@ -71,7 +91,7 @@
 	},
 	"button_about": {
 		"en": [
-			":information: ABOUT"
+			":information: About"
 		]
 	},
 	"error_bad_deep_link": {
