@@ -190,7 +190,11 @@
 			"Available for withdrawal:"
 		]
 	},
-	
+	"tip_too_small": {
+		"en": [
+			"Tip is smaller than its fee. Don't be so mean.  :no_mouth:"
+		]
+	},
 	"global_paused": {
 		"en": [
 			":pause_button: Sorry, this bot has been paused by the admins. Try again later."

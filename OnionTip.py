@@ -451,8 +451,15 @@ def tip(update: Update, context: CallbackContext):
     _amounts_float = []
     try:
         for _amount in _amounts:
-            _adjusted_amount = convert_to_float(
-                _amount) * __units["multiplier"]
+            _adjusted_amount = float(_amount)
+            if(_adjusted_amount < __fee_std):
+                update.message.reply_text(
+                text=emoji.emojize(strings.get("tip_too_small", _lang),
+                use_aliases=True),
+                quote=True,
+                parse_mode=ParseMode.MARKDOWN
+                )
+                return
             _amounts_float.append(_adjusted_amount)
     except:
         _amounts_float = []
@@ -708,7 +715,7 @@ def withdraw(update: Update, context: CallbackContext):
                             _rpc_call["result"]["error"])
                     else:
                         _balance = float(_rpc_call["result"]["result"])
-                        if _balance < _amount + __fee_std*2:
+                        if _balance < float(_amount) + __fee_std*2:
                             update.message.reply_text(
                                 text="%s `%s`" % (strings.get(
                                     "withdraw_no_funds", _lang), convert_satoshi(_balance-__fee_std*2)),
@@ -718,7 +725,7 @@ def withdraw(update: Update, context: CallbackContext):
                         else:
                             # Withdraw
                             _rpc_call = __wallet_rpc.sendfrom(
-                                _user_id, _recipient, _amount, __minconf)
+                                _user_id, _recipient, float(_amount), __minconf)
                             if not _rpc_call["success"]:
                                 print("Error during RPC call.")
                                 log("withdraw", _user_id, "(3) sendfrom > Error during RPC call: %s" %
