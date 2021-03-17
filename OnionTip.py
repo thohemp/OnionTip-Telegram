@@ -5,7 +5,7 @@
 from datetime import datetime
 import time
 import emoji
-from telegram.ext import CommandHandler, CallbackQueryHandler, Updater, CallbackContext
+from telegram.ext import CommandHandler, CallbackQueryHandler, Updater, CallbackContext, MessageHandler, Filters
 from telegram import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup, Update, KeyboardButton, ReplyKeyboardMarkup
 from BitcoinRPC import BitcoinRPC, Wrapper as RPCWrapper
 from HelperFunctions import *
@@ -42,8 +42,24 @@ __blockchain_explorer_tx = "https://explorer.deeponion.org/tx/"
 # See issue #4 (https://github.com/DarthJahus/oniontip-Telegram/issues/4)
 __minconf = 0
 
+BUTTON_PRESSED = range(6)
 
-# ToDo: Add some admin commands to check the health of the daemon / wallet.
+
+def echo(update: Update, context: CallbackContext) -> None:
+    if(update.message.text == emoji.emojize(strings.get("button_balance", _lang), use_aliases=True)):
+        balance(update, context) 
+    elif(update.message.text == emoji.emojize(strings.get("button_deposit", _lang), use_aliases=True)):
+        deposit(update, context)
+    elif(update.message.text == emoji.emojize(strings.get("button_withdraw", _lang), use_aliases=True)):
+        update.message.reply_text("Use `/withdraw <address> <amount>`", quote=True, parse_mode=ParseMode.MARKDOWN
+)
+    elif(update.message.text == emoji.emojize(strings.get("button_send", _lang), use_aliases=True)):
+        tip(update, context)
+    elif(update.message.text == emoji.emojize(strings.get("button_help", _lang), use_aliases=True)):
+        cmd_help(update, context)
+    elif(update.message.text == emoji.emojize(strings.get("button_about", _lang), use_aliases=True)):
+        cmd_about(update, context)
+        
 
 
 # ToDo: Don't forget to write the strings in strings.json (they are actually empty)
@@ -105,7 +121,8 @@ def cmd_start(update: Update, context: CallbackContext):
                 [
                     [_button_balance, _button_deposit, _button_withdraw],
                     [_button_send, _button_help, _button_about]
-                ]
+                ], 
+                resize_keyboard=True
             )
             update.message.reply_text(
                 emoji.emojize(strings.get("welcome", _lang), use_aliases=True),
@@ -386,6 +403,14 @@ def tip(update: Update, context: CallbackContext):
     /tip u1 u2 u3 ... v1 v2 v3 ...
     /tip u1 v1 u2 v2 u3 v3 ...
     """
+    if context.args == None:
+        update.message.reply_text(
+                        text="Use `/tip <user> <amount>`. Make sure to correctly tag your the person you are tipping.",
+                        quote=True,
+                        parse_mode=ParseMode.MARKDOWN,
+                    )
+        return
+
     if len(context.args) == 0:
         return
     if not _spam_filter.verify(str(update.effective_user.id)):
@@ -503,7 +528,11 @@ def tip(update: Update, context: CallbackContext):
                         for _recipient in _recipients:
                             # add "or _recipient == bot.id" to disallow tipping the tip bot
                             if _recipient == _user_id:
-                                # From DarthJahus/PandaTip-Telegram#3
+                                update.message.reply_text(
+                                text="There is no point in tipping yourself",
+                                quote=True,
+                                parse_mode=ParseMode.MARKDOWN
+                                )                                
                                 i += 1
                                 continue
                             if _recipient[0] == '@':
@@ -622,6 +651,9 @@ def withdraw(update: Update, context: CallbackContext):
             return
         _amount = None
         _recipient = None
+        if context.args == None:
+            update.message.reply_text("You have to provide an withdraw address and an ONION amount.", quote=True)
+            return
         if len(context.args) == 2:
             try:
                 _amount = context.args[1]
@@ -963,5 +995,6 @@ if __name__ == "__main__":
     dispatcher.add_handler(CommandHandler("clear_log", cmd_clear_log))
     dispatcher.add_handler(CommandHandler(
         "pause", cmd_pause))  # pause / unpause
+    dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, echo))
     updater.start_polling()
     log("__main__", "__system__", "Started service!")
