@@ -42,8 +42,6 @@ __blockchain_explorer_tx = "https://explorer.deeponion.org/tx/"
 # See issue #4 (https://github.com/DarthJahus/oniontip-Telegram/issues/4)
 __minconf = 0
 
-BUTTON_PRESSED = range(6)
-
 
 def echo(update: Update, context: CallbackContext) -> None:
     if(update.message.text == emoji.emojize(strings.get("button_balance", _lang), use_aliases=True)):
@@ -76,6 +74,13 @@ def cmd_start(update: Update, context: CallbackContext):
                 cmd_help(update, context)
             elif context.args[0].lower() == "address":
                 deposit(update, context)
+            elif context.args[0].lower() == "balance":
+                balance(update, context)
+            elif context.args[0].lower() == "deposit":
+                deposit(update, context)
+            elif context.args[0].lower() == "withdraw":
+                withdraw(update, context)
+
             else:
                 update.message.reply_text(
                     strings.get("error_bad_deep_link", _lang),
@@ -229,6 +234,7 @@ def cmd_help(update: Update, context: CallbackContext):
                 "button_help", _lang), use_aliases=True),
             url="https://telegram.me/%s?start=help" % context.bot.username
         )
+        print(_button.url)
         _markup = InlineKeyboardMarkup(
             [[_button]]
         )
@@ -270,8 +276,6 @@ def deposit(update: Update, context: CallbackContext):
         _chat_type = "private"
     else:
         _chat_type = "group"
-        update.message.reply_text(text=emoji.emojize(strings.get(
-            "user_balance_public"), use_aliases=True), quote=True)
 
     # Only show deposit address if it's a private conversation with the bot
     if _chat_type == "private":
@@ -324,7 +328,21 @@ def deposit(update: Update, context: CallbackContext):
                         parse_mode=ParseMode.MARKDOWN,
                         disable_web_page_preview=True
                     )
-
+    else:
+        _button = InlineKeyboardButton(
+            text=emoji.emojize(strings.get(
+                "button_deposit", _lang), use_aliases=True),
+            url="https://telegram.me/%s?start=deposit" % context.bot.username,
+        )
+        _markup = InlineKeyboardMarkup(
+            [[_button]]
+        )
+        update.message.reply_text(
+            "%s" % strings.get("user_balance_public", _lang),
+            parse_mode=ParseMode.MARKDOWN,
+            disable_web_page_preview=True,
+            reply_markup=_markup
+        )
 
 # Done: Give balance only if a private chat (2018-07-15)
 # Done: Remove WorldCoinIndex (2018-07-15)
@@ -336,8 +354,6 @@ def balance(update: Update, context: CallbackContext):
         _chat_type = "private"
     else:
         _chat_type = "group"
-        update.message.reply_text(text=emoji.emojize(strings.get(
-            "user_balance_public"), use_aliases=True), quote=True)
 
     # Only show balance if it's a private conversation with the bot
     if _chat_type == "private":
@@ -393,6 +409,21 @@ def balance(update: Update, context: CallbackContext):
                         parse_mode=ParseMode.MARKDOWN,
                         quote=True
                     )
+    else:
+        _button = InlineKeyboardButton(
+            text=emoji.emojize(strings.get(
+                "button_balance", _lang), use_aliases=True),
+            url="https://telegram.me/%s?start=balance" % context.bot.username,
+        )
+        _markup = InlineKeyboardMarkup(
+            [[_button]]
+        )
+        update.message.reply_text(
+            "%s" % strings.get("user_balance_public", _lang),
+            parse_mode=ParseMode.MARKDOWN,
+            disable_web_page_preview=True,
+            reply_markup=_markup
+        )
 
 
 # Done: Rewrite the whole logic; use tags instead of parsing usernames (2018-07-15)
@@ -405,7 +436,7 @@ def tip(update: Update, context: CallbackContext):
     """
     if context.args == None:
         update.message.reply_text(
-                        text="Use `/tip <user> <amount>`. Make sure to correctly tag your the person you are tipping.",
+                        text="Use `/tip <user> <amount>`. Make sure to correctly tag the person you are tipping.",
                         quote=True,
                         parse_mode=ParseMode.MARKDOWN,
                     )
@@ -747,6 +778,21 @@ def withdraw(update: Update, context: CallbackContext):
                                     parse_mode=ParseMode.MARKDOWN,
                                     disable_web_page_preview=True
                                 )
+    else:
+        _button = InlineKeyboardButton(
+            text=emoji.emojize(strings.get(
+                "button_withdraw", _lang), use_aliases=True),
+            url="https://telegram.me/%s?start=withdraw" % context.bot.username,
+        )
+        _markup = InlineKeyboardMarkup(
+            [[_button]]
+        )
+        update.message.reply_text(
+            "%s" % strings.get("user_balance_public", _lang),
+            parse_mode=ParseMode.MARKDOWN,
+            disable_web_page_preview=True,
+            reply_markup=_markup
+        )
 
 
 def scavenge(update: Update, context: CallbackContext):
@@ -905,10 +951,9 @@ def cmd_send_log(update: Update, context: CallbackContext):
     """
     # Note: Don't use emoji in caption
     # Check if admin
-    bot = context.bot
     if update.effective_chat.id in config["admins"]:
         with open("log.csv", "rb") as _file:
-            _file_name = "%s-log-%s.csv" % (contex.tbot.username, datetime.fromtimestamp(
+            _file_name = "%s-log-%s.csv" % (context.bot.username, datetime.fromtimestamp(
                 time.time()).strftime("%Y-%m-%dT%H-%M-%S"))
             context.bot.sendDocument(
                 chat_id=update.effective_user.id,
