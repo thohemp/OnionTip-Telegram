@@ -32,7 +32,7 @@ class Wrapper(MethodMissing):
 			return self.http_post_request(name, args)
 
 
-class BitcoinRPC(object):
+class DeepOnionRPC(object):
 	def __init__(self, uri, auth):
 		self.uri = uri
 		self.auth = auth
@@ -69,27 +69,8 @@ class BitcoinRPC(object):
 
 def main():
 	_config = load_file_json("config.json") 
-	myBitcoin = Wrapper(BitcoinRPC(_config["rpc-uri"], (_config["rpc-user"], _config["rpc-psw"])))
-	# getaccountaddress creates an address if account doesn't exist.
-	# warning, getaccountaddress will create a new address for the account if its current address has been used
-	# use getaddressesbyaccount instead
-	res = myBitcoin.getaddressesbyaccount("@obszoenling")
-	if not res["success"]:
-		print("Error: %s" % res["message"])
-	else:
-		if res["result"]["error"] is not None:
-			print("Error: %s" % res["result"]["error"])
-		else:
-			print(json.dumps(res["result"]["result"]))
-	return
-	#res = myBitcoin.sendmany("oniontip", {"@jahus": 0.00005, "1234": 0.00006})
-	#if not res["success"]:
-	#	print("Error: %s" % res["message"])
-	#else:
-	#	if res["result"]["error"] is not None:
-	#		print("Error: %s" % res["result"]["error"])
-	#	else:
-	#		print(json.dumps(res["result"]["result"]))
+	myBitcoin = Wrapper(DeepOnionRPC(_config["rpc-uri"], (_config["rpc-user"], _config["rpc-psw"])))
+
 
 
 if __name__ == "__main__":

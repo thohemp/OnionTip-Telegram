@@ -7,7 +7,7 @@ import time
 import emoji
 from telegram.ext import CommandHandler, CallbackQueryHandler, Updater, CallbackContext, MessageHandler, Filters
 from telegram import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup, Update, KeyboardButton, ReplyKeyboardMarkup
-from BitcoinRPC import BitcoinRPC, Wrapper as RPCWrapper
+from DeepOnionRPC import DeepOnionRPC, Wrapper as RPCWrapper
 from HelperFunctions import *
 import logging
 logging.basicConfig(level=logging.INFO,
@@ -23,7 +23,7 @@ _spam_filter = AntiSpamFilter(
     config["spam_filter"][0], config["spam_filter"][1])
 
 # Constants
-__wallet_rpc = RPCWrapper(BitcoinRPC(
+__wallet_rpc = RPCWrapper(DeepOnionRPC(
     config["rpc-uri"], (config["rpc-user"], config["rpc-psw"])))
 __fee_std = 0.00010
 __units = {
