@@ -69,7 +69,6 @@ class DeepOnionRPC(object):
 
 def main():
 	_config = load_file_json("config.json") 
-	myBitcoin = Wrapper(DeepOnionRPC(_config["rpc-uri"], (_config["rpc-user"], _config["rpc-psw"])))
 
 
 
