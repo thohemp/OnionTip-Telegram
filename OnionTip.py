@@ -5,7 +5,7 @@
 from datetime import datetime
 import time
 import emoji
-from telegram.ext import CommandHandler, CallbackQueryHandler, Updater, CallbackContext, MessageHandler, Filters
+from telegram.ext import CommandHandler, CallbackQueryHandler, Updater, CallbackContext, MessageHandler, Filters, filters
 from telegram import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup, Update, KeyboardButton, ReplyKeyboardMarkup
 from DeepOnionRPC import DeepOnionRPC, Wrapper as RPCWrapper
 from HelperFunctions import *
@@ -21,6 +21,10 @@ strings = Strings("strings.json")
 _paused = False
 _spam_filter = AntiSpamFilter(
     config["spam_filter"][0], config["spam_filter"][1])
+
+_rain_queues = {
+    "-1": [("0", "@username", "Name")]
+}
 
 # Constants
 __wallet_rpc = RPCWrapper(DeepOnionRPC(
@@ -42,22 +46,82 @@ __blockchain_explorer_tx = "https://explorer.deeponion.org/tx/"
 # See issue #4 (https://github.com/DarthJahus/oniontip-Telegram/issues/4)
 __minconf = 0
 
+__rain_queue_filter = Filters.chat_type.groups & (
+    Filters.text | Filters.photo | Filters.video | Filters.reply | Filters.forwarded
+)
+
+#__rain_queue_filter = Filters.chat_type.private
+__rain_queue_min_text_length = 10  # 10
+__rain_queue_min_words = 2  # 2
+__rain_queue_max_members = 30  # Max members in a queue, 30
+__rain_min_members = 1  # 5
+__rain_min_amount = 1  # 10
+
 
 def echo(update: Update, context: CallbackContext) -> None:
     if(update.message.text == emoji.emojize(strings.get("button_balance", _lang), use_aliases=True)):
-        balance(update, context) 
+        balance(update, context)
     elif(update.message.text == emoji.emojize(strings.get("button_deposit", _lang), use_aliases=True)):
         deposit(update, context)
     elif(update.message.text == emoji.emojize(strings.get("button_withdraw", _lang), use_aliases=True)):
         update.message.reply_text("Use `/withdraw <address> <amount>`", quote=True, parse_mode=ParseMode.MARKDOWN
-)
+                                  )
     elif(update.message.text == emoji.emojize(strings.get("button_send", _lang), use_aliases=True)):
         tip(update, context)
     elif(update.message.text == emoji.emojize(strings.get("button_help", _lang), use_aliases=True)):
         cmd_help(update, context)
     elif(update.message.text == emoji.emojize(strings.get("button_about", _lang), use_aliases=True)):
         cmd_about(update, context)
-        
+
+
+def cmd_start_keyboard(update: Update, context: CallbackContext):
+    _button_balance = KeyboardButton(
+        text=emoji.emojize(strings.get(
+            "button_balance", _lang), use_aliases=True),
+        callback_data="balance"
+    )
+    _button_deposit = KeyboardButton(
+        text=emoji.emojize(strings.get(
+            "button_deposit", _lang), use_aliases=True),
+        callback_data="deposit"
+    )
+
+    _button_withdraw = KeyboardButton(
+        text=emoji.emojize(strings.get(
+            "button_withdraw", _lang), use_aliases=True),
+        callback_data="withdraw"
+    )
+
+    _button_send = KeyboardButton(
+        text=emoji.emojize(strings.get(
+            "button_send", _lang), use_aliases=True),
+        callback_data="tip"
+    )
+
+    _button_help = KeyboardButton(
+        text=emoji.emojize(strings.get(
+            "button_help", _lang), use_aliases=True),
+        callback_data="help"
+    )
+    _button_about = KeyboardButton(
+        text=emoji.emojize(strings.get(
+            "button_about", _lang), use_aliases=True),
+        callback_data="about"
+    )
+    _markup = ReplyKeyboardMarkup(
+        [
+            [_button_balance, _button_deposit, _button_withdraw],
+            [_button_send, _button_help, _button_about]
+        ],
+        resize_keyboard=True
+    )
+    update.message.reply_text(
+        text = "",
+        quote=True,
+        parse_mode=ParseMode.MARKDOWN,
+        disable_web_page_preview=True,
+        reply_markup=_markup
+    )
 
 
 # ToDo: Don't forget to write the strings in strings.json (they are actually empty)
@@ -126,7 +190,7 @@ def cmd_start(update: Update, context: CallbackContext):
                 [
                     [_button_balance, _button_deposit, _button_withdraw],
                     [_button_send, _button_help, _button_about]
-                ], 
+                ],
                 resize_keyboard=True
             )
             update.message.reply_text(
@@ -347,6 +411,8 @@ def deposit(update: Update, context: CallbackContext):
 # Done: Give balance only if a private chat (2018-07-15)
 # Done: Remove WorldCoinIndex (2018-07-15)
 # ToDo: Add conversion
+
+
 def balance(update: Update, context: CallbackContext):
     if update.effective_chat is None:
         _chat_type = "private"
@@ -436,10 +502,10 @@ def tip(update: Update, context: CallbackContext):
     """
     if context.args == None:
         update.message.reply_text(
-                        text="Use `/tip <user> <amount>`. Make sure to correctly tag the person you are tipping.",
-                        quote=True,
-                        parse_mode=ParseMode.MARKDOWN,
-                    )
+            text="Use `/tip <user> <amount>`. Make sure to correctly tag the person you are tipping.",
+            quote=True,
+            parse_mode=ParseMode.MARKDOWN,
+        )
         return
 
     if len(context.args) == 0:
@@ -485,10 +551,10 @@ def tip(update: Update, context: CallbackContext):
             _adjusted_amount = float(_amount)
             if(_adjusted_amount < __fee_std):
                 update.message.reply_text(
-                text=emoji.emojize(strings.get("tip_too_small", _lang),
-                use_aliases=True),
-                quote=True,
-                parse_mode=ParseMode.MARKDOWN
+                    text=emoji.emojize(strings.get("tip_too_small", _lang),
+                                       use_aliases=True),
+                    quote=True,
+                    parse_mode=ParseMode.MARKDOWN
                 )
                 return
             _amounts_float.append(_adjusted_amount)
@@ -567,10 +633,10 @@ def tip(update: Update, context: CallbackContext):
                             # add "or _recipient == bot.id" to disallow tipping the tip bot
                             if _recipient == _user_id:
                                 update.message.reply_text(
-                                text="There is no point in tipping yourself",
-                                quote=True,
-                                parse_mode=ParseMode.MARKDOWN
-                                )                                
+                                    text="There is no point in tipping yourself",
+                                    quote=True,
+                                    parse_mode=ParseMode.MARKDOWN
+                                )
                                 i += 1
                                 continue
                             if _recipient[0] == '@':
@@ -690,7 +756,8 @@ def withdraw(update: Update, context: CallbackContext):
         _amount = None
         _recipient = None
         if context.args == None:
-            update.message.reply_text("You have to provide an withdraw address and an ONION amount.", quote=True)
+            update.message.reply_text(
+                "You have to provide an withdraw address and an ONION amount.", quote=True)
             return
         if len(context.args) == 2:
             try:
@@ -933,6 +1000,310 @@ def scavenge(update: Update, context: CallbackContext):
                                         )
 
 
+def damp_rock(update: Update, context: CallbackContext):
+    print(_rain_queues)
+    """
+    Manages a queue of active users.
+    Activity type is checked before calling this function.
+    Message length should be enforced to avoid spam.
+    :param bot: Bot
+    :param update: Update
+    :return: None
+    """
+    if _paused:
+        return
+    if update.effective_chat is None:
+        return
+    elif update.effective_chat.type not in ["group", "supergroup"]:
+        return
+    #
+    _group_id = str(update.effective_chat.id)
+    if update.effective_user.is_bot:
+        return
+    # Get user_id for the tip command (either @username or else UserID)
+    _username = update.effective_user.username
+    # The queue uses real UserID to avoid registering a user twice if user creates @
+    _user_id = str(update.effective_user.id)
+    if _username is None:
+        _user_id_local = _user_id
+        _user_readable_name = update.effective_user.name
+    else:
+        _user_id_local = '@' + _username.lower()
+        _user_readable_name = _username
+    if update.effective_message.text is not None:
+        if len(update.effective_message.text) < __rain_queue_min_text_length:
+            return
+        if len(update.effective_message.text.split()) < __rain_queue_min_words:
+            return
+    # Check the queue
+    if _group_id not in _rain_queues:
+        _rain_queues[_group_id] = []
+    # Note: In Python2, Dict doesn't preserve order as in Python3 (see https://stackoverflow.com/questions/14956313)
+    if len(_rain_queues[_group_id]) > 0:
+        # If user has talked last, don't remove it, don't add it.
+        # Don't use "is not", the object will not be the same, only value will
+        if _rain_queues[_group_id][0][0] == _user_id:
+            return
+        else:
+            # Search for user and remove it (in order to place it first)
+            for _user_data in _rain_queues[_group_id]:
+                if _user_data[0] == _user_id:
+                    _rain_queues[_group_id].remove(_user_data)
+                    break
+    # Add user to queue (first, since it will be read from first to last)
+    _rain_queues[_group_id].insert(
+        0, (_user_id, _user_id_local, _user_readable_name))
+    # Check if the queue has to be pruned
+    if len(_rain_queues[_group_id]) > __rain_queue_max_members:
+        # pop(-1). This should be enough to remove the last member, but real pruning would be better
+        _rain_queues[_group_id].pop()
+
+
+def rain(update: Update, context: CallbackContext):
+    if not _spam_filter.verify(str(update.effective_user.id)):
+        return
+    if _paused:
+        update.message.reply_text(text=emoji.emojize(
+            strings.get("global_paused"), use_aliases=True), quote=True)
+        return
+    if update.effective_chat is None:
+        return
+    elif update.effective_chat.type not in ["group", "supergroup"]:
+        return
+    #
+    _group_id = str(update.effective_chat.id)
+    _user_id = str(update.effective_user.id)
+    # We may or may not allow text after the first 2 arguments. Probably not.
+    if 0 < len(context.args) <= 2:
+        # Check if queue has enough members
+        if _group_id not in _rain_queues:
+            update.message.reply_text(
+                strings.get("rain_queue_not_initialized", _lang),
+                quote=True,
+                parse_mode=ParseMode.MARKDOWN,
+                disable_web_page_preview=True
+            )
+            return
+        # Prepare arguments
+        _rain_amount_demanded = 0
+        # number of members = min(optional args[1], queue_max, queue_len)
+        _rain_members_demanded = __rain_queue_max_members
+        try:
+            _rain_amount_demanded = int(context.args[0])
+            if len(context.args) > 1:
+                _rain_members_demanded = int(context.args[1])
+        except ValueError:
+            return  # Don't show error. Probably trolling.
+        if _rain_amount_demanded < __rain_min_amount:
+            update.message.reply_text(
+                strings.get("rain_queue_min_amount", _lang) % (
+                    __rain_min_amount, "PND", _rain_amount_demanded, "PND"),
+                quote=True,
+                parse_mode=ParseMode.MARKDOWN,
+                disable_web_page_preview=True
+            )
+            return
+        if _rain_members_demanded < __rain_min_members or _rain_members_demanded > __rain_queue_max_members:
+            update.message.reply_text(
+                strings.get("rain_queue_min_max_members", _lang) % (
+                    __rain_min_members, __rain_queue_max_members, _rain_members_demanded),
+                quote=True,
+                parse_mode=ParseMode.MARKDOWN,
+                disable_web_page_preview=True
+            )
+            return
+        # Check if user is in queue, don't remove user from original queue as recipients array will be created later
+        # Note that using this command doesn't put the user in queue (commands are excluded from damp_rock())
+        _modifier = 0
+        for _user_data in _rain_queues[_group_id]:
+            if _user_data[0] == _user_id:
+                _modifier = -1
+                break
+        # Check if there are enough members in queue (minus user if needed)
+        if len(_rain_queues[_group_id]) + _modifier < __rain_min_members:
+            update.message.reply_text(
+                strings.get("rain_queue_not_enough_members", _lang) % (
+                    len(_rain_queues[_group_id]) + _modifier,
+                    - _modifier,
+                    __rain_min_members
+                ),
+                quote=True,
+                parse_mode=ParseMode.MARKDOWN,
+                disable_web_page_preview=True
+            )
+            return
+        # Prepare queue for tips
+        _recipients = []  # Array of LocalUserID
+        _handled = {}  # Dict of LocalUserID: (Readable Name, Unused, Unused)
+        for _user_data in _rain_queues[_group_id]:
+            if _user_data[0] != _user_id:
+                # Local UserID (@username or else UserID)
+                _recipients.append(_user_data[1])
+                _handled[_user_data[1]] = (_user_data[2], None, None)
+                if len(_recipients) >= _rain_members_demanded:
+                    break
+        log("rain", _user_id, "rain (%i over %i members) handed to do_tip()" %
+            (_rain_amount_demanded, len(_recipients)))
+        do_tip(update, context, [_rain_amount_demanded],
+               _recipients, _handled, verb="rain")
+
+
+def do_tip(update: Update, context: CallbackContext, amounts_float, recipients, handled, verb="tip"):
+    """
+    Send amounts to recipients
+    :param bot: Bot
+    :param update: Update
+    :param amounts_float: Array of Float
+    :param recipients: Array of Username or UserID
+    :param handled: Dict of {"username or UserID": (username, entity.offset, entity.length)
+    :param verb: "tip", will be used in "%verb%_success" and "%verb%_missing_recipient" strings
+    :return: None
+    """
+    #
+    if verb not in ["tip", "rain"]:
+        log("do_tip", "__system__", "Incorrect verb passed to do_tip()")
+        verb = "tip"
+    # Check if only 1 amount is given
+    _amounts_float = amounts_float
+    if len(_amounts_float) == 1 and len(recipients) > 1:
+        _amounts_float = _amounts_float * len(recipients)
+    # Check if user has enough balance
+    _username = update.effective_user.username
+    if _username is None:
+        _user_id = str(update.effective_user.id)
+    else:
+        _user_id = '@' + _username.lower()
+    # get address of user
+    _rpc_call = __wallet_rpc.getaddressesbyaccount(_user_id)
+    if not _rpc_call["success"]:
+        print("Error during RPC call: %s" % _rpc_call["message"])
+        log("do_tip", _user_id, "(1) getaddressesbyaccount > Error during RPC call: %s" %
+            _rpc_call["message"])
+    elif _rpc_call["result"]["error"] is not None:
+        print("Error: %s" % _rpc_call["result"]["error"])
+        log("do_tip", _user_id, "(1) getaddressesbyaccount > Error: %s" %
+            _rpc_call["result"]["error"])
+    else:
+        _addresses = _rpc_call["result"]["result"]
+        if len(_addresses) == 0:
+            # User has no address, ask him to create one
+            msg_no_account(context.bot, update)
+        else:
+            _address = _addresses[0]
+            # Get user's balance
+            _rpc_call = __wallet_rpc.getbalance(_address)
+            if not _rpc_call["success"]:
+                print("Error during RPC call.")
+                log("do_tip", _user_id, "(2) getbalance > Error during RPC call: %s" %
+                    _rpc_call["message"])
+            elif _rpc_call["result"]["error"] is not None:
+                print("Error: %s" % _rpc_call["result"]["error"])
+                log("do_tip", _user_id, "(2) getbalance > Error: %s" %
+                    _rpc_call["result"]["error"])
+            else:
+                _balance = int(_rpc_call["result"]["result"])
+                # Now, finally, check if user has enough funds (includes tx fee)
+                if sum(_amounts_float) > _balance - max(1, int(len(recipients)/3)):
+                    update.message.reply_text(
+                        text="%s `%i PND`" % (strings.get("tip_no_funds", _lang), sum(
+                            _amounts_float) + max(1, int(len(recipients)/3))),
+                        quote=True,
+                        parse_mode=ParseMode.MARKDOWN
+                    )
+                else:
+                    # Now create the {recipient_id: amount} dictionary
+                    i = 0
+                    _tip_dict = {}
+                    for _recipient in recipients:
+                        # add "or _recipient == bot.id" to disallow tipping the tip bot
+                        if _recipient == _user_id:
+                            i += 1
+                            continue
+                        if _recipient[0] == '@':
+                            # ToDo: Get the id (actually not possible (Bot API 3.6, Feb. 2018)
+                            # See issue #2 (https://github.com/DarthJahus/PandaTip-Telegram/issues/2)
+                            # Using the @username
+                            # Done: When requesting a new address, if user has a @username, then use that username (2018-07-16)
+                            # Problem: If someone has no username, then later creates one, he loses access to his account
+                            # Done: Create a /scavenge command that allows people who had UserID to migrate to UserName (2018-07-16)
+                            _recipient_id = _recipient.lower()  # Enforce lowercase
+                        else:
+                            _recipient_id = _recipient
+                        # Check if recipient has an address (required for .sendmany()
+                        _rpc_call = __wallet_rpc.getaddressesbyaccount(
+                            _recipient_id)
+                        if not _rpc_call["success"]:
+                            print("Error during RPC call.")
+                            log("do_tip", _user_id, "(3) getaddressesbyaccount(%s) > Error during RPC call: %s" % (
+                                _recipient_id, _rpc_call["message"]))
+                        elif _rpc_call["result"]["error"] is not None:
+                            print("Error: %s" % _rpc_call["result"]["error"])
+                            log("do_tip", _user_id, "(3) getaddressesbyaccount(%s) > Error: %s" % (
+                                _recipient_id, _rpc_call["result"]["error"]))
+                        else:
+                            _address = None
+                            _addresses = _rpc_call["result"]["result"]
+                            if len(_addresses) == 0:
+                                # Recipient has no address, create one
+                                _rpc_call = __wallet_rpc.getaccountaddress(
+                                    _recipient_id)
+                                if not _rpc_call["success"]:
+                                    print("Error during RPC call.")
+                                    log("do_tip", _user_id, "(4) getaccountaddress(%s) > Error during RPC call: %s" % (
+                                        _recipient_id, _rpc_call["message"]))
+                                elif _rpc_call["result"]["error"] is not None:
+                                    print("Error: %s" %
+                                          _rpc_call["result"]["error"])
+                                    log("do_tip", _user_id, "(4) getaccountaddress(%s) > Error: %s" % (
+                                        _recipient_id, _rpc_call["result"]["error"]))
+                                else:
+                                    _address = _rpc_call["result"]["result"]
+                            else:
+                                # Recipient has an address, we don't need to create one for him
+                                _address = _addresses[0]
+                        if _address is not None:
+                            # Because recipient has an address, we can add him to the dict
+                            _tip_dict[_recipient_id] = _amounts_float[i]
+                        i += 1
+                    #
+                    # Check if there are users left to tip
+                    if len(_tip_dict) == 0:
+                        return
+                    # Done: replace .move by .sendfrom or .sendmany (2018-07-16)
+                    # sendfrom <from address or account> <receive address or account> <amount> [minconf=1] [comment] [comment-to]
+                    # and
+                    # sendmany <from address or account> {receive address or account:amount,...} [minconf=1] [comment]
+                    _rpc_call = __wallet_rpc.sendmany(_user_id, _tip_dict)
+                    if not _rpc_call["success"]:
+                        print("Error during RPC call.")
+                        log("do_tip", _user_id, "(4) sendmany > Error during RPC call: %s" %
+                            _rpc_call["message"])
+                    elif _rpc_call["result"]["error"] is not None:
+                        print("Error: %s" % _rpc_call["result"]["error"])
+                        log("do_tip", _user_id, "(4) sendmany > Error: %s" %
+                            _rpc_call["result"]["error"])
+                    else:
+                        _tx = _rpc_call["result"]["result"]
+                        _suppl = ""
+                        if len(_tip_dict) != len(recipients):
+                            _suppl = "\n\n_%s_" % strings.get(
+                                "%s_missing_recipient" % verb, _lang)
+                        update.message.reply_text(
+                            text="*%s* %s\n%s\n\n[tx %s](%s)%s" % (
+                                update.effective_user.name,
+                                strings.get("%s_success" % verb, _lang),
+                                ''.join((("\n- `%3.0f PND ` %s *%s*" % (_tip_dict[_recipient_id], strings.get(
+                                    "%s_preposition" % verb, _lang), handled[_recipient_id][0])) for _recipient_id in _tip_dict)),
+                                _tx[:4] + "..." + _tx[-4:],
+                                "https://chainz.cryptoid.info/pnd/tx.dws?" + _tx,
+                                _suppl
+                            ),
+                            quote=True,
+                            parse_mode=ParseMode.MARKDOWN,
+                            disable_web_page_preview=True
+                        )
+
+
 def convert_to_float(text):
     return float(text)
 
@@ -1003,6 +1374,8 @@ def hi(update: Update, context: CallbackContext):
     if not _spam_filter.verify(str(update.effective_user.id)):
         return  # ToDo: Return a message?
     user = update.message.from_user.username
+    if user is None:
+        user = "tagless person"
     bot.send_message(chat_id=update.message.chat_id,
                      text="Hello @{0}, how are you doing today?".format(user))
 
@@ -1038,6 +1411,7 @@ if __name__ == "__main__":
         'address', deposit))  # alias for /deposit
     dispatcher.add_handler(CommandHandler('balance', balance))
     dispatcher.add_handler(CommandHandler("scavenge", scavenge))
+    dispatcher.add_handler(CommandHandler("rain", rain, pass_args=True))
     # Conversion commands
     dispatcher.add_handler(CommandHandler('marketcap', marketcap))
     dispatcher.add_handler(CommandHandler('price', price))
@@ -1047,6 +1421,9 @@ if __name__ == "__main__":
     dispatcher.add_handler(CommandHandler("clear_log", cmd_clear_log))
     dispatcher.add_handler(CommandHandler(
         "pause", cmd_pause))  # pause / unpause
-    dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, echo))
+    # This will be needed for rain
+    dispatcher.add_handler(MessageHandler(__rain_queue_filter, damp_rock))
+    dispatcher.add_handler(MessageHandler(
+        Filters.text & ~Filters.command, echo))
     updater.start_polling()
     log("__main__", "__system__", "Started service!")

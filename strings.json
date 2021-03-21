@@ -217,5 +217,50 @@
 		"en": [
 			":white_check_mark: Cleared!"
 		]
+	},
+
+	"rain_queue_not_initialized": {
+		"en": [
+			"It can't rain for now as queue is empty.",
+			"Please try again when more people have been active."
+		]
+	},
+
+	"rain_queue_not_enough_members": {
+		"en": [
+			"It can't rain for now as there aren't enough active users.",
+			"Active: `%i (+%i)`",
+			"Required: `%i`"
+		]
+	},
+
+	"rain_queue_min_amount": {
+		"en": [
+			"Can't rain less than `%i %s` per member (demanded: `%i %s`)."
+		]
+	},
+
+	"rain_queue_min_max_members": {
+		"en": [
+			"Can't rain on less than `%i` or more than `%i%` members (demanded: `%i`)."
+		]
+	},
+
+	"rain_success": {
+		"en": [
+			"successfully rained:"
+		]
+	},
+
+	"rain_missing_recipient": {
+		"en": [
+			"Some users couldn't be rained upon. Reasons..."
+		]
+	},
+
+	"rain_preposition": {
+		"en": [
+			"on"
+		]
 	}
 }
