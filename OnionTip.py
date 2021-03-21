@@ -1104,7 +1104,7 @@ def rain(update: Update, context: CallbackContext):
             return
         if _rain_members_demanded < __rain_min_members or _rain_members_demanded > __rain_queue_max_members:
             update.message.reply_text(
-                strings.get("rain_queue_min_max_members", _lang) % (
+                "Can't rain on less than `{}` or more than `{}` members (demanded: `{}`).".format(
                     __rain_min_members, __rain_queue_max_members, _rain_members_demanded),
                 quote=True,
                 parse_mode=ParseMode.MARKDOWN,
@@ -1300,6 +1300,8 @@ def do_tip(update: Update, context: CallbackContext, amounts_float, recipients, 
                         log("tip", _user_id, "(4) sendmany > Error: %s" %
                             _rpc_call["result"]["error"])
                     else:
+                        # reset queue
+                        _rain_queues = {"-1": [("0", "@username", "Name")]}
                         _tx = _rpc_call["result"]["result"]
                         _suppl = ""
                         if len(_tip_dict) != len(recipients):

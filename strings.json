@@ -241,13 +241,13 @@
 
 	"rain_queue_min_amount": {
 		"en": [
-			"Can't rain less than `%i %s` per member (demanded: `%i %s`)."
+			"Can't rain less than `%f %s` per member (demanded: `%f %s`)."
 		]
 	},
 
 	"rain_queue_min_max_members": {
 		"en": [
-			"Can't rain on less than `%i` or more than `%i%` members (demanded: `%i`)."
+			"Can't rain on less than `%i` or more than `i%` members (demanded: `%i`)."
 		]
 	},
 
