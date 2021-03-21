@@ -22,8 +22,9 @@ _paused = False
 _spam_filter = AntiSpamFilter(
     config["spam_filter"][0], config["spam_filter"][1])
 
-_rain_queues = {'-1': [('306291300', '@obszoenling', 'obszoenling')],
-                '-525663256': [('1269048493', '@pajulapoiss', 'Pajulapoiss')]}
+_rain_queues = {
+	"-1": [("0", "@username", "Name")]
+}
 
 
 # Constants
@@ -54,8 +55,8 @@ __rain_queue_filter = Filters.chat_type.groups & (
 __rain_queue_min_text_length = 10  # 10
 __rain_queue_min_words = 2  # 2
 __rain_queue_max_members = 30  # Max members in a queue, 30
-__rain_min_members = 1  # 5
-__rain_min_amount = 0.01  # 10
+__rain_min_members = 3  # 5
+__rain_min_amount = 0.001  # 10
 
 
 def echo(update: Update, context: CallbackContext) -> None:
