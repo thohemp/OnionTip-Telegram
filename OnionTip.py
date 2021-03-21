@@ -55,7 +55,7 @@ __rain_queue_min_text_length = 10  # 10
 __rain_queue_min_words = 2  # 2
 __rain_queue_max_members = 30  # Max members in a queue, 30
 __rain_min_members = 1  # 5
-__rain_min_amount = 1  # 10
+__rain_min_amount = 0.01  # 10
 
 
 def echo(update: Update, context: CallbackContext) -> None:
@@ -298,7 +298,6 @@ def cmd_help(update: Update, context: CallbackContext):
                 "button_help", _lang), use_aliases=True),
             url="https://telegram.me/%s?start=help" % context.bot.username
         )
-        print(_button.url)
         _markup = InlineKeyboardMarkup(
             [[_button]]
         )
@@ -455,7 +454,6 @@ def balance(update: Update, context: CallbackContext):
                 # Maybe if something really weird happens and user ends up having more, we can calculate his balance.
                 # This way, when asking for address (/deposit), we can return the first one.
                 _address = _addresses[0]
-                print(_address)
                 if __rpc_getbalance_account:
                     _rpc_call = __wallet_rpc.getbalance(_user_id, __minconf)
                 else:
@@ -470,7 +468,6 @@ def balance(update: Update, context: CallbackContext):
                         _rpc_call["result"]["error"])
                 else:
                     _balance = float(_rpc_call["result"]["result"])
-                    print(_balance)
                     update.message.reply_text(
                         text="%s\n`%s`" % (strings.get(
                             "user_balance", _lang), convert_satoshi(_balance)),
@@ -1003,7 +1000,6 @@ def scavenge(update: Update, context: CallbackContext):
 
 
 def damp_rock(update: Update, context: CallbackContext):
-    print(_rain_queues)
     """
     Manages a queue of active users.
     Activity type is checked before calling this function.
@@ -1091,7 +1087,7 @@ def rain(update: Update, context: CallbackContext):
         # number of members = min(optional args[1], queue_max, queue_len)
         _rain_members_demanded = __rain_queue_max_members
         try:
-            _rain_amount_demanded = int(context.args[0])
+            _rain_amount_demanded = float(context.args[0])
             if len(context.args) > 1:
                 _rain_members_demanded = int(context.args[1])
         except ValueError:
@@ -1099,7 +1095,7 @@ def rain(update: Update, context: CallbackContext):
         if _rain_amount_demanded < __rain_min_amount:
             update.message.reply_text(
                 strings.get("rain_queue_min_amount", _lang) % (
-                    __rain_min_amount, "PND", _rain_amount_demanded, "PND"),
+                    __rain_min_amount, "ONION", _rain_amount_demanded, "ONION"),
                 quote=True,
                 parse_mode=ParseMode.MARKDOWN,
                 disable_web_page_preview=True
@@ -1151,7 +1147,6 @@ def rain(update: Update, context: CallbackContext):
 
 
 def do_tip(update: Update, context: CallbackContext, amounts_float, recipients, handled, verb="tip"):
-    print("here")
     """
     Send amounts to recipients
     :param bot: Bot
@@ -1193,7 +1188,6 @@ def do_tip(update: Update, context: CallbackContext, amounts_float, recipients, 
             msg_no_account(context.bot, update)
         else:
             _address = _addresses[0]
-            print(_address)
             if __rpc_getbalance_account:
                 _rpc_call = __wallet_rpc.getbalance(_user_id, __minconf)
             else:
@@ -1307,7 +1301,7 @@ def do_tip(update: Update, context: CallbackContext, amounts_float, recipients, 
                     else:
                         _tx = _rpc_call["result"]["result"]
                         _suppl = ""
-                        if len(_tip_dict) != len(_recipients):
+                        if len(_tip_dict) != len(recipients):
                             _suppl = "\n\n_%s_" % strings.get(
                                 "tip_missing_recipient", _lang)
                         update.message.reply_text(
@@ -1315,7 +1309,7 @@ def do_tip(update: Update, context: CallbackContext, amounts_float, recipients, 
                                 update.effective_user.name,
                                 strings.get("tip_success", _lang),
                                 ''.join((("\n- `%6s `to *%s*" % (convert_satoshi(
-                                    _tip_dict_accounts[_recipient_id]), _handled[_recipient_id][0])) for _recipient_id in _tip_dict_accounts)),
+                                    _tip_dict_accounts[_recipient_id]), handled[_recipient_id][0])) for _recipient_id in _tip_dict_accounts)),
                                 _tx[:4] + "..." + _tx[-4:],
                                 __blockchain_explorer_tx + _tx,
                                 _suppl
