@@ -18,6 +18,7 @@ Deposit, store and share bits with your friends.
 deposit -Get your deposit address
 balance -Show your balance
 tip - <user> <amount> - Send amount to another user
+rain - <amount> [user count]. Important: `amount` will be sent to each member, and it will NOT be shared among them."
 withdraw - <address> <amount> - Withdraw your funds to an address
 address -Get your deposit address
 scavenge - Migrate your account (ask admin)
