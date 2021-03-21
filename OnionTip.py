@@ -22,7 +22,8 @@ _paused = False
 _spam_filter = AntiSpamFilter(
     config["spam_filter"][0], config["spam_filter"][1])
 
-_rain_queues = {'-1': [('306291300', '@obszoenling', 'obszoenling')], '-525663256': [('1269048493', '@pajulapoiss', 'Pajulapoiss')]}
+_rain_queues = {'-1': [('306291300', '@obszoenling', 'obszoenling')],
+                '-525663256': [('1269048493', '@pajulapoiss', 'Pajulapoiss')]}
 
 
 # Constants
@@ -115,7 +116,7 @@ def cmd_start_keyboard(update: Update, context: CallbackContext):
         resize_keyboard=True
     )
     update.message.reply_text(
-        text = "",
+        text="",
         quote=True,
         parse_mode=ParseMode.MARKDOWN,
         disable_web_page_preview=True,
@@ -1200,7 +1201,7 @@ def do_tip(update: Update, context: CallbackContext, amounts_float, recipients, 
             if not _rpc_call["success"]:
                 print("Error during RPC call.")
                 log("balance", _user_id, "(2) getbalance > Error during RPC call: %s" %
-                        _rpc_call["message"])
+                    _rpc_call["message"])
             elif _rpc_call["result"]["error"] is not None:
                 print("Error: %s" % _rpc_call["result"]["error"])
                 log("balance", _user_id, "(2) getbalance > Error: %s" %
@@ -1215,23 +1216,28 @@ def do_tip(update: Update, context: CallbackContext, amounts_float, recipients, 
                         quote=True,
                         parse_mode=ParseMode.MARKDOWN
                     )
+                # Now create the {recipient_id: amount} dictionary
                 else:
-                    # Now create the {recipient_id: amount} dictionary
                     i = 0
-                    _tip_dict = {}
+                    _tip_dict_addresses = {}
+                    _tip_dict_accounts = {}
                     for _recipient in recipients:
                         # add "or _recipient == bot.id" to disallow tipping the tip bot
                         if _recipient == _user_id:
+                            update.message.reply_text(
+                                text="There is no point in tipping yourself",
+                                quote=True,
+                                parse_mode=ParseMode.MARKDOWN
+                            )
                             i += 1
                             continue
                         if _recipient[0] == '@':
                             # ToDo: Get the id (actually not possible (Bot API 3.6, Feb. 2018)
-                            # See issue #2 (https://github.com/DarthJahus/PandaTip-Telegram/issues/2)
                             # Using the @username
                             # Done: When requesting a new address, if user has a @username, then use that username (2018-07-16)
                             # Problem: If someone has no username, then later creates one, he loses access to his account
                             # Done: Create a /scavenge command that allows people who had UserID to migrate to UserName (2018-07-16)
-                            _recipient_id = _recipient.lower()  # Enforce lowercase
+                            _recipient_id = _recipient
                         else:
                             _recipient_id = _recipient
                         # Check if recipient has an address (required for .sendmany()
@@ -1239,11 +1245,12 @@ def do_tip(update: Update, context: CallbackContext, amounts_float, recipients, 
                             _recipient_id)
                         if not _rpc_call["success"]:
                             print("Error during RPC call.")
-                            log("do_tip", _user_id, "(3) getaddressesbyaccount(%s) > Error during RPC call: %s" % (
-                                _recipient_id, _rpc_call["message"]))
+                            log("tip", _user_id,
+                                "(3) getaddressesbyaccount(%s) > Error during RPC call: %s" % (_recipient_id, _rpc_call["message"]))
                         elif _rpc_call["result"]["error"] is not None:
-                            print("Error: %s" % _rpc_call["result"]["error"])
-                            log("do_tip", _user_id, "(3) getaddressesbyaccount(%s) > Error: %s" % (
+                            print("Error: %s" %
+                                  _rpc_call["result"]["error"])
+                            log("tip", _user_id, "(3) getaddressesbyaccount(%s) > Error: %s" % (
                                 _recipient_id, _rpc_call["result"]["error"]))
                         else:
                             _address = None
@@ -1254,54 +1261,61 @@ def do_tip(update: Update, context: CallbackContext, amounts_float, recipients, 
                                     _recipient_id)
                                 if not _rpc_call["success"]:
                                     print("Error during RPC call.")
-                                    log("do_tip", _user_id, "(4) getaccountaddress(%s) > Error during RPC call: %s" % (
-                                        _recipient_id, _rpc_call["message"]))
+                                    log("tip", _user_id,
+                                        "(4) getaccountaddress(%s) > Error during RPC call: %s" % (
+                                            _recipient_id, _rpc_call["message"])
+                                        )
                                 elif _rpc_call["result"]["error"] is not None:
                                     print("Error: %s" %
                                           _rpc_call["result"]["error"])
-                                    log("do_tip", _user_id, "(4) getaccountaddress(%s) > Error: %s" % (
+                                    log("tip", _user_id, "(4) getaccountaddress(%s) > Error: %s" % (
                                         _recipient_id, _rpc_call["result"]["error"]))
                                 else:
                                     _address = _rpc_call["result"]["result"]
                             else:
                                 # Recipient has an address, we don't need to create one for him
                                 _address = _addresses[0]
-                        print(_address)
                         if _address is not None:
                             # Because recipient has an address, we can add him to the dict
-                            _tip_dict[_recipient_id] = _amounts_float[i]
+                            _tip_dict_accounts[_recipient_id] = _amounts_float[i]
                             _tip_dict_addresses[_address] = _amounts_float[i]
-
                         i += 1
                     #
+                    _tip_dict = {}
+                    if __rpc_sendmany_account:
+                        _tip_dict = _tip_dict_accounts
+                    else:
+                        _tip_dict = _tip_dict_addresses
                     # Check if there are users left to tip
                     if len(_tip_dict) == 0:
                         return
+
                     # Done: replace .move by .sendfrom or .sendmany (2018-07-16)
                     # sendfrom <from address or account> <receive address or account> <amount> [minconf=1] [comment] [comment-to]
                     # and
                     # sendmany <from address or account> {receive address or account:amount,...} [minconf=1] [comment]
-                    _rpc_call = __wallet_rpc.sendmany(_user_id, _tip_dict)
+                    _rpc_call = __wallet_rpc.sendmany(
+                        _user_id, _tip_dict, __minconf)
                     if not _rpc_call["success"]:
                         print("Error during RPC call.")
-                        log("do_tip", _user_id, "(4) sendmany > Error during RPC call: %s" %
+                        log("tip", _user_id, "(4) sendmany > Error during RPC call: %s" %
                             _rpc_call["message"])
                     elif _rpc_call["result"]["error"] is not None:
                         print("Error: %s" % _rpc_call["result"]["error"])
-                        log("do_tip", _user_id, "(4) sendmany > Error: %s" %
+                        log("tip", _user_id, "(4) sendmany > Error: %s" %
                             _rpc_call["result"]["error"])
                     else:
                         _tx = _rpc_call["result"]["result"]
                         _suppl = ""
-                        if len(_tip_dict) != len(recipients):
+                        if len(_tip_dict) != len(_recipients):
                             _suppl = "\n\n_%s_" % strings.get(
-                                "%s_missing_recipient" % verb, _lang)
+                                "tip_missing_recipient", _lang)
                         update.message.reply_text(
                             text="*%s* %s\n%s\n\n[tx %s](%s)%s" % (
                                 update.effective_user.name,
-                                strings.get("%s_success" % verb, _lang),
-                                ''.join((("\n- `%3.0f PND ` %s *%s*" % (_tip_dict[_recipient_id], strings.get(
-                                    "%s_preposition" % verb, _lang), handled[_recipient_id][0])) for _recipient_id in _tip_dict)),
+                                strings.get("tip_success", _lang),
+                                ''.join((("\n- `%6s `to *%s*" % (convert_satoshi(
+                                    _tip_dict_accounts[_recipient_id]), _handled[_recipient_id][0])) for _recipient_id in _tip_dict_accounts)),
                                 _tx[:4] + "..." + _tx[-4:],
                                 __blockchain_explorer_tx + _tx,
                                 _suppl
