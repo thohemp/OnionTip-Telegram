@@ -22,9 +22,8 @@ _paused = False
 _spam_filter = AntiSpamFilter(
     config["spam_filter"][0], config["spam_filter"][1])
 
-_rain_queues = {
-    "-1": [("0", "@username", "Name")]
-}
+_rain_queues = {'-1': [('306291300', '@obszoenling', 'obszoenling')], '-525663256': [('1269048493', '@pajulapoiss', 'Pajulapoiss')]}
+
 
 # Constants
 __wallet_rpc = RPCWrapper(DeepOnionRPC(
@@ -455,6 +454,7 @@ def balance(update: Update, context: CallbackContext):
                 # Maybe if something really weird happens and user ends up having more, we can calculate his balance.
                 # This way, when asking for address (/deposit), we can return the first one.
                 _address = _addresses[0]
+                print(_address)
                 if __rpc_getbalance_account:
                     _rpc_call = __wallet_rpc.getbalance(_user_id, __minconf)
                 else:
@@ -469,6 +469,7 @@ def balance(update: Update, context: CallbackContext):
                         _rpc_call["result"]["error"])
                 else:
                     _balance = float(_rpc_call["result"]["result"])
+                    print(_balance)
                     update.message.reply_text(
                         text="%s\n`%s`" % (strings.get(
                             "user_balance", _lang), convert_satoshi(_balance)),
@@ -1149,6 +1150,7 @@ def rain(update: Update, context: CallbackContext):
 
 
 def do_tip(update: Update, context: CallbackContext, amounts_float, recipients, handled, verb="tip"):
+    print("here")
     """
     Send amounts to recipients
     :param bot: Bot
@@ -1190,22 +1192,25 @@ def do_tip(update: Update, context: CallbackContext, amounts_float, recipients, 
             msg_no_account(context.bot, update)
         else:
             _address = _addresses[0]
-            # Get user's balance
-            _rpc_call = __wallet_rpc.getbalance(_address)
+            print(_address)
+            if __rpc_getbalance_account:
+                _rpc_call = __wallet_rpc.getbalance(_user_id, __minconf)
+            else:
+                _rpc_call = __wallet_rpc.getbalance(_address, __minconf)
             if not _rpc_call["success"]:
                 print("Error during RPC call.")
-                log("do_tip", _user_id, "(2) getbalance > Error during RPC call: %s" %
-                    _rpc_call["message"])
+                log("balance", _user_id, "(2) getbalance > Error during RPC call: %s" %
+                        _rpc_call["message"])
             elif _rpc_call["result"]["error"] is not None:
                 print("Error: %s" % _rpc_call["result"]["error"])
-                log("do_tip", _user_id, "(2) getbalance > Error: %s" %
+                log("balance", _user_id, "(2) getbalance > Error: %s" %
                     _rpc_call["result"]["error"])
             else:
-                _balance = int(_rpc_call["result"]["result"])
+                _balance = float(_rpc_call["result"]["result"])
                 # Now, finally, check if user has enough funds (includes tx fee)
                 if sum(_amounts_float) > _balance - max(1, int(len(recipients)/3)):
                     update.message.reply_text(
-                        text="%s `%i PND`" % (strings.get("tip_no_funds", _lang), sum(
+                        text="%s `%f ONION`" % (strings.get("tip_no_funds", _lang), sum(
                             _amounts_float) + max(1, int(len(recipients)/3))),
                         quote=True,
                         parse_mode=ParseMode.MARKDOWN
@@ -1261,9 +1266,12 @@ def do_tip(update: Update, context: CallbackContext, amounts_float, recipients, 
                             else:
                                 # Recipient has an address, we don't need to create one for him
                                 _address = _addresses[0]
+                        print(_address)
                         if _address is not None:
                             # Because recipient has an address, we can add him to the dict
                             _tip_dict[_recipient_id] = _amounts_float[i]
+                            _tip_dict_addresses[_address] = _amounts_float[i]
+
                         i += 1
                     #
                     # Check if there are users left to tip
@@ -1295,7 +1303,7 @@ def do_tip(update: Update, context: CallbackContext, amounts_float, recipients, 
                                 ''.join((("\n- `%3.0f PND ` %s *%s*" % (_tip_dict[_recipient_id], strings.get(
                                     "%s_preposition" % verb, _lang), handled[_recipient_id][0])) for _recipient_id in _tip_dict)),
                                 _tx[:4] + "..." + _tx[-4:],
-                                "https://chainz.cryptoid.info/pnd/tx.dws?" + _tx,
+                                __blockchain_explorer_tx + _tx,
                                 _suppl
                             ),
                             quote=True,
