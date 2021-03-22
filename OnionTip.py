@@ -1319,8 +1319,8 @@ def do_tip(update: Update, context: CallbackContext, amounts_float, recipients, 
                             parse_mode=ParseMode.MARKDOWN,
                             disable_web_page_preview=True
                         )
-                        # clear queues
-                        _rain_queues.clear()
+                        # clear only dedicated queue
+                        del _rain_queues[str(update.effective_chat.id)]
 
 
 
