@@ -1300,8 +1300,6 @@ def do_tip(update: Update, context: CallbackContext, amounts_float, recipients, 
                         log("tip", _user_id, "(4) sendmany > Error: %s" %
                             _rpc_call["result"]["error"])
                     else:
-                        # reset queue
-                        _rain_queues = {"-1": [("0", "@username", "Name")]}
                         _tx = _rpc_call["result"]["result"]
                         _suppl = ""
                         if len(_tip_dict) != len(recipients):
@@ -1310,8 +1308,8 @@ def do_tip(update: Update, context: CallbackContext, amounts_float, recipients, 
                         update.message.reply_text(
                             text="*%s* %s\n%s\n\n[tx %s](%s)%s" % (
                                 update.effective_user.name,
-                                strings.get("tip_success", _lang),
-                                ''.join((("\n- `%6s `to *%s*" % (convert_satoshi(
+                                strings.get("rain_success", _lang),
+                                ''.join((("\n- `%6s `to *@%s*" % (convert_satoshi(
                                     _tip_dict_accounts[_recipient_id]), handled[_recipient_id][0])) for _recipient_id in _tip_dict_accounts)),
                                 _tx[:4] + "..." + _tx[-4:],
                                 __blockchain_explorer_tx + _tx,
@@ -1321,6 +1319,9 @@ def do_tip(update: Update, context: CallbackContext, amounts_float, recipients, 
                             parse_mode=ParseMode.MARKDOWN,
                             disable_web_page_preview=True
                         )
+                        # clear queues
+                        _rain_queues.clear()
+
 
 
 def convert_to_float(text):

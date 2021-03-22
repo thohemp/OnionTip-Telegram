@@ -172,6 +172,11 @@
 			"successfully tipped:"
 		]
 	},
+	"rain_succes": {
+		"en": [
+			"made it rain:"
+		]
+	},
 	
 	"tip_missing_recipient": {
 		"en": [
