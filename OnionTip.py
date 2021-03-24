@@ -1204,10 +1204,10 @@ def do_tip(update: Update, context: CallbackContext, amounts_float, recipients, 
             else:
                 _balance = float(_rpc_call["result"]["result"])
                 # Now, finally, check if user has enough funds (includes tx fee)
-                if sum(_amounts_float) > _balance - max(1, int(len(recipients)/3)):
+                if sum(_amounts_float) > _balance - max(1**__fee_std, int(len(recipients)/3)*__fee_std):
                     update.message.reply_text(
                         text="%s `%f ONION`" % (strings.get("tip_no_funds", _lang), sum(
-                            _amounts_float) + max(1, int(len(recipients)/3))),
+                            _amounts_float) + max(1**__fee_std, int(len(recipients)/3)*__fee_std)),
                         quote=True,
                         parse_mode=ParseMode.MARKDOWN
                     )
