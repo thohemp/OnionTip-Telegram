@@ -16,12 +16,11 @@
 Description=oniontipbot
 After=syslog.target
 After=network.target
-After=bitcoind.service
 
 [Service]
 Type=simple
-ExecStart=/bitcoin/oniontip-telegram/OnionTip.py
-WorkingDirectory=/bitcoin/oniontip-telegram/
+ExecStart=/OnionTip-Telegram/OnionTip.py
+WorkingDirectory=/Oniontip-Telegram/
 Restart=always
 RestartSec=600
 

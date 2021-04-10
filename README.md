@@ -21,8 +21,8 @@ Create a `config.json` **JSON** file and set up the following parameters:
     	"telegram-token": "sicret-token",
     	"telegram-botname": "OnionTip",
     	"rpc-uri": "http://127.0.0.1:8332",
-    	"rpc-user": "oniontip",
-    	"rpc-psw": "suchpassword",
+    	"rpc-user": "user",
+    	"rpc-psw": "user",
     	"admins": [-0, 0],
     	"spam_filter": [5, 60]
     }
