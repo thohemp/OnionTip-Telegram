@@ -5,14 +5,14 @@ This bot allows you to receive, store and send ONIONS on Telegram.
 
 💁 Once you have some ONIONS, share them with your friends.
 
-🌐  You can withdraw your bits at any time.
+🌐  You can withdraw your ONIONs at any time.
 
 ℹ️  Need help and usage tricks?
 Use the command /help!
 
 /setabouttext
 Tipping bot for DeepOnion.
-Deposit, store and share bits with your friends.
+Deposit, store and share ONIONs with your friends.
 
 /setcommands
 deposit -Get your deposit address
