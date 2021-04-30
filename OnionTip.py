@@ -6,6 +6,7 @@ from datetime import datetime
 import time
 import emoji
 from telegram.ext import CommandHandler, CallbackQueryHandler, Updater, CallbackContext, MessageHandler, Filters, filters
+from telegram.utils.helpers import escape_markdown
 from telegram import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup, Update, KeyboardButton, ReplyKeyboardMarkup
 from DeepOnionRPC import DeepOnionRPC, Wrapper as RPCWrapper
 from HelperFunctions import *
@@ -65,14 +66,15 @@ def echo(update: Update, context: CallbackContext) -> None:
     elif(update.message.text == emoji.emojize(strings.get("button_deposit", _lang), use_aliases=True)):
         deposit(update, context)
     elif(update.message.text == emoji.emojize(strings.get("button_withdraw", _lang), use_aliases=True)):
-        update.message.reply_text("Use `/withdraw <address> <amount>`", quote=True, parse_mode=ParseMode.MARKDOWN
-                                  )
+        update.message.reply_text("Use `/withdraw <address> <amount>`", quote=True, parse_mode=ParseMode.MARKDOWN)
     elif(update.message.text == emoji.emojize(strings.get("button_send", _lang), use_aliases=True)):
         tip(update, context)
     elif(update.message.text == emoji.emojize(strings.get("button_help", _lang), use_aliases=True)):
         cmd_help(update, context)
     elif(update.message.text == emoji.emojize(strings.get("button_about", _lang), use_aliases=True)):
         cmd_about(update, context)
+    if(update.message.text == emoji.emojize(strings.get("button_exchanges", _lang), use_aliases=True)):
+        exchanges(update, context)
 
 
 def cmd_start_keyboard(update: Update, context: CallbackContext):
@@ -145,6 +147,8 @@ def cmd_start(update: Update, context: CallbackContext):
                 deposit(update, context)
             elif context.args[0].lower() == "withdraw":
                 withdraw(update, context)
+            elif context.args[0].lower() == "exchanges":
+                exchanges(update, context)
 
             else:
                 update.message.reply_text(
@@ -325,7 +329,7 @@ def msg_no_account(update: Update, context: CallbackContext):
         "%s" % strings.get("user_no_address", _lang),
         parse_mode=ParseMode.MARKDOWN,
         disable_web_page_preview=True,
-        reply_markup=_markup,
+        reply_markup=_markup
     )
 
 
@@ -1407,6 +1411,34 @@ def moon(update: Update, context: CallbackContext):
 def market_cap(update: Update, context: CallbackContext):
     pass
 
+def exchanges(update: Update, context: CallbackContext):
+    update.message.reply_text(
+            strings.get("exchanges_list", _lang),
+            parse_mode=ParseMode.MARKDOWN,
+            disable_web_page_preview=True
+        )
+
+
+def welcome(update: Update, context: CallbackContext):
+    for new_user_obj in update.message.new_chat_members:
+        new_user =new_user_obj.name
+        _button = InlineKeyboardButton(
+            text=emoji.emojize(strings.get(
+                "button_exchanges", _lang), use_aliases=True),
+            url="https://telegram.me/%s?start=exchanges" % context.bot.username,
+        )
+        _markup = InlineKeyboardMarkup(
+            [[_button]]
+        )
+        update.message.reply_text(
+            "Hello {0}, welcome to DeepOnion".format(new_user),
+            parse_mode=ParseMode.MARKDOWN,
+            disable_web_page_preview=True,
+            reply_markup=_markup
+        )
+
+
+
 
 if __name__ == "__main__":
     updater = Updater(token=config["telegram-token"])
@@ -1445,5 +1477,9 @@ if __name__ == "__main__":
     dispatcher.add_handler(MessageHandler(__rain_queue_filter, damp_rock))
     dispatcher.add_handler(MessageHandler(
         Filters.text & ~Filters.command, echo))
+    # Welcome new user
+    dispatcher.add_handler(MessageHandler(Filters.status_update.new_chat_members, welcome))
     updater.start_polling()
+    dispatcher.add_handler(CommandHandler('exchanges', exchanges))
+
     log("__main__", "__system__", "Started service!")

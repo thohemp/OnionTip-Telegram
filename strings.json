@@ -77,6 +77,11 @@
 			":zap: Send"
 		]
 	},
+	"button_exchanges": {
+		"en": [
+			":chart_with_upwards_trend: Exchanges"
+		]
+	},
 	"about": {
 		"en": [
 			"This is a tipbot for DeepOnion.",
@@ -271,6 +276,25 @@
 	"rain_preposition": {
 		"en": [
 			"on"
+		]
+	},
+	"exchanges_list": {
+		"en":[
+			"You can buy and sell ONIONs on following exchanges:",
+			"",
+			"TradeOgre (non KYC): https://tradeogre.com/exchange/BTC-ONION",
+			"",
+			"SouthXchange (non KYC): https://main.southxchange.com/Market/Book/ONION/BTC",
+			"",
+			"Citex (non KYC): https://trade.citex.co.kr/trade/ONION\\_BTC",
+			"",
+			"Coinsbit: https://coinsbit.io/trade/ONION\\_BTC",
+			"",
+			"Crex: https://crex24.com/nl/exchange/ONION-BTC",
+			"",
+			"Bitexlive: https://bitexlive.com/exchange/BTC-ONION",
+			"",
+			"Stex: https://app.stex.com/en/basic-trade/pair/BTC/ONION/"
 		]
 	}
 }
