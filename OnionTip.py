@@ -75,6 +75,10 @@ def echo(update: Update, context: CallbackContext) -> None:
         cmd_about(update, context)
     if(update.message.text == emoji.emojize(strings.get("button_exchanges", _lang), use_aliases=True)):
         exchanges(update, context)
+    if(update.message.text == emoji.emojize(strings.get("button_features", _lang), use_aliases=True)):
+        features(update, context)
+    if(update.message.text == emoji.emojize(strings.get("button_roadmap", _lang), use_aliases=True)):
+        roadmap(update, context)
 
 
 def cmd_start_keyboard(update: Update, context: CallbackContext):
@@ -149,6 +153,10 @@ def cmd_start(update: Update, context: CallbackContext):
                 withdraw(update, context)
             elif context.args[0].lower() == "exchanges":
                 exchanges(update, context)
+            elif context.args[0].lower() == "features":
+                features(update, context)
+            elif context.args[0].lower() == "roadmap":
+                roadmap(update, context)
 
             else:
                 update.message.reply_text(
@@ -1412,26 +1420,96 @@ def market_cap(update: Update, context: CallbackContext):
     pass
 
 def exchanges(update: Update, context: CallbackContext):
-    update.message.reply_text(
-            strings.get("exchanges_list", _lang),
+    _button_feature = InlineKeyboardButton(
+            text=emoji.emojize(strings.get(
+                "button_features", _lang), use_aliases=True),
+            callback_data= "features",
+        )
+    _button_roadmap = InlineKeyboardButton(
+            text=emoji.emojize(strings.get(
+                "button_roadmap", _lang), use_aliases=True),
+            callback_data= "roadmap",
+        )
+    _markup = InlineKeyboardMarkup(
+            [[_button_feature, _button_roadmap]]
+        )
+    context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            text = emoji.emojize(strings.get("exchanges_list", _lang), use_aliases=True),
             parse_mode=ParseMode.MARKDOWN,
-            disable_web_page_preview=True
+            disable_web_page_preview=True,
+            reply_markup=_markup
         )
 
+def features(update: Update, context: CallbackContext):
+    _button_roadmap = InlineKeyboardButton(
+            text=emoji.emojize(strings.get(
+                "button_roadmap", _lang), use_aliases=True),
+            callback_data= "roadmap",
+        )
+    _button_exchange = InlineKeyboardButton(
+            text=emoji.emojize(strings.get(
+                "button_exchanges", _lang), use_aliases=True),
+            callback_data= "exchanges",
+        )
+    _markup = InlineKeyboardMarkup(
+            [[_button_exchange, _button_roadmap]]
+        )
+    context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            text = emoji.emojize(strings.get("feature_list", _lang), use_aliases=True),
+            parse_mode=ParseMode.MARKDOWN,
+            disable_web_page_preview=True,
+            reply_markup=_markup
+        )
+
+def roadmap(update: Update, context: CallbackContext):
+    _button_exchange = InlineKeyboardButton(
+            text=emoji.emojize(strings.get(
+                "button_exchanges", _lang), use_aliases=True),
+            callback_data= "exchanges",
+        )
+    _button_feature = InlineKeyboardButton(
+            text=emoji.emojize(strings.get(
+                "button_features", _lang), use_aliases=True),
+            callback_data= "features",
+        )
+    _markup = InlineKeyboardMarkup(
+            [[_button_feature, _button_exchange]]
+        )
+    context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            text = emoji.emojize(strings.get("roadmap", _lang), use_aliases=True),
+            parse_mode=ParseMode.MARKDOWN,
+            disable_web_page_preview=True,
+            reply_markup=_markup
+        )
 
 def welcome(update: Update, context: CallbackContext):
     for new_user_obj in update.message.new_chat_members:
         new_user =new_user_obj.name
-        _button = InlineKeyboardButton(
+        _button_exchange = InlineKeyboardButton(
             text=emoji.emojize(strings.get(
                 "button_exchanges", _lang), use_aliases=True),
             url="https://telegram.me/%s?start=exchanges" % context.bot.username,
         )
-        _markup = InlineKeyboardMarkup(
-            [[_button]]
+        _button_feature = InlineKeyboardButton(
+            text=emoji.emojize(strings.get(
+                "button_features", _lang), use_aliases=True),
+            url="https://telegram.me/%s?start=features" % context.bot.username,
         )
-        update.message.reply_text(
-            "Hello {0}, welcome to DeepOnion".format(new_user),
+        _button_roadmap = InlineKeyboardButton(
+            text=emoji.emojize(strings.get(
+                "button_roadmap", _lang), use_aliases=True),
+            url="https://telegram.me/%s?start=roadmap" % context.bot.username,
+        )
+        _markup = InlineKeyboardMarkup(
+            [[_button_feature, _button_roadmap, _button_exchange,]]
+        )
+        context.bot.send_message(
+            chat_id= update.message.chat_id,
+            text= emoji.emojize(strings.get(
+                "welcome_new", _lang), use_aliases=True).format(new_user),
             parse_mode=ParseMode.MARKDOWN,
             disable_web_page_preview=True,
             reply_markup=_markup
@@ -1481,5 +1559,15 @@ if __name__ == "__main__":
     dispatcher.add_handler(MessageHandler(Filters.status_update.new_chat_members, welcome))
     updater.start_polling()
     dispatcher.add_handler(CommandHandler('exchanges', exchanges))
+    dispatcher.add_handler(CommandHandler('features', features))
+    dispatcher.add_handler(CommandHandler('roadmap', roadmap))
+    dispatcher.add_handler(CallbackQueryHandler(
+        callback=exchanges, pattern=r'^exchanges$'))
+    dispatcher.add_handler(CallbackQueryHandler(
+        callback=features, pattern=r'^features$'))
+    dispatcher.add_handler(CallbackQueryHandler(
+        callback=roadmap, pattern=r'^roadmap$'))
+
+
 
     log("__main__", "__system__", "Started service!")

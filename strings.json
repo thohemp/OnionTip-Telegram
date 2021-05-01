@@ -5,6 +5,11 @@
 			"You can use it to share ONIONs with your friends."
 		]
 	},
+	"welcome_new":{
+		"en":[
+			"Hello {0}, welcome to DeepOnion!"
+		]
+	},
 	"help": {
 		"en": [
 			"This bot allows you to receive, store and send bits on Telegram.",
@@ -80,6 +85,16 @@
 	"button_exchanges": {
 		"en": [
 			":chart_with_upwards_trend: Exchanges"
+		]
+	},
+	"button_features": {
+		"en": [
+			":fire: Features"
+		]
+	},
+	"button_roadmap": {
+		"en":[
+			" :star: Roadmap"
 		]
 	},
 	"about": {
@@ -280,21 +295,69 @@
 	},
 	"exchanges_list": {
 		"en":[
-			"You can buy and sell ONIONs on following exchanges:",
+			"*You can buy and sell ONIONs on following exchanges:*",
 			"",
-			"TradeOgre (non KYC): https://tradeogre.com/exchange/BTC-ONION",
+			":arrow_forward: TradeOgre: [ONION/BTC](https://tradeogre.com/exchange/BTC-ONION)",
 			"",
-			"SouthXchange (non KYC): https://main.southxchange.com/Market/Book/ONION/BTC",
+			":arrow_forward: SouthXchange: [ONION/BTC](https://main.southxchange.com/Market/Book/ONION/BTC), [ONION/LTC](https://main.southxchange.com/Market/Book/ONION/LTC)",
 			"",
-			"Citex (non KYC): https://trade.citex.co.kr/trade/ONION\\_BTC",
+			":arrow_forward: Citex: [ONION/BTC](https://trade.citex.co.kr/trade/ONION\\_BTC), [ONION/USDT](https://trade.citex.co.kr/trade/ONION\\_USDT)",
 			"",
-			"Coinsbit: https://coinsbit.io/trade/ONION\\_BTC",
+			":arrow_forward: Coinsbit: [ONION/BTC](https://coinsbit.io/trade/ONION\\_BTC),  [ONION/USDT](https://coinsbit.io/trade/ONION\\_USDT)",
 			"",
-			"Crex: https://crex24.com/nl/exchange/ONION-BTC",
+			":arrow_forward: Crex: [ONION/BTC](https://crex24.com/nl/exchange/ONION-BTC), [ONION/USDPM](https://crex24.com/exchange/ONION-USDPM), [ONION/EURPM](https://crex24.com/exchange/ONION-EURPM), [ONION/RUB](https://crex24.com/exchange/ONION-RUB)",
 			"",
-			"Bitexlive: https://bitexlive.com/exchange/BTC-ONION",
+			":arrow_forward: Bitexlive: [ONION/BTC](https://bitexlive.com/exchange/BTC-ONION)",
 			"",
-			"Stex: https://app.stex.com/en/basic-trade/pair/BTC/ONION/"
+			":arrow_forward: Stex: [ONION/BTC](https://app.stex.com/en/basic-trade/pair/BTC/ONION/)"
+		]
+	},
+	"feature_list": {
+		"en":[":fire: *Keyfeatures of DeepOnion:*",
+			"",
+			":boom: *DeepSend:*",
+			"",
+			"- DeepSend is a blockchain privacy technology by DeepOnion for private payments without evidence between the buyer and the merchant.",
+			"- No cryptographic encryption or mixing pools are used, but instead, a random wallet hidden behind the anonymous Tor® network will send your payment without leaving traces.",		
+			"",
+			" :arrow_forward: [Learn more about DeepSend](https://deeponion.org/#deepsend)",
+			"",
+			"",
+			":boom: *DeepVault:*",
+			"",
+			"- DeepVault is a blockchain notary service by DeepOnion to register your digital files on the DeepOnion blockchain. A digital signature will be generated then uploaded to the blockchain.",
+			"- Your files will never leave your device. Your customers can verify your ownership of your files by visiting DeepVaultOnline.com without registration.",
+			"- Start now and protect yourself and your customers from tampered files. ",
+			"",
+			" :arrow_forward: [Learn more about DeepVault](https://deeponion.org/#deepvault)",
+			"",
+			"Are you still not convinced?",
+			"- Read more about our other features:",
+			":boom: VoteCentral",
+			":boom: Stealth-Addresses",
+			":boom: DeepOnion Ecommerce Plugins",
+			":boom: Bitcoin checkpoint security layer",
+			"and much more: Visit us: https://deeponion.org"
+		]
+	},
+	"roadmap":{
+		"en":[
+			":boom: *DeepOnion Roadmap*",
+			"",
+			":fire: *Electrum Support - (2021Q2)*",
+			"Electrum is a blockchain-less wallet which will allow sending and receiving payments without downloading the blockchain. It will be updated again to natively integrate Tor® and run without a proxy in 2021Q3.",
+			"",
+			":fire: *BIP68 Integration - (2021Q2)*",
+			" This is a prerequisite for Atomic Swaps and extends the range of possible Smart Contracts. It is a relative lock-time consensus-enforced semantics of the sequence number field to enable a signed transaction input to remain invalid for a defined period of time after confirmation of its corresponding outpoint.",
+			"",
+			":fire: *Tor® v3 Addresses - (2021Q2)*",
+			"Switching from Tor® v2 addresses to Tor® v3 addresses which are now becoming the standard for the network. The cryptographic building blocks use more secure signature algorithms and hashing methods. The v3 addresses are 56 characters long. No one will ever find out your onion service exists unless you tell them. ",
+			"",
+			":fire: *DeepOnionJ - (2021Q3)*",
+			"DeepOnionJ Tor® integration for Desktop and Android. DeepOnionJ allows developers to rapidly build and use all of the DeepOnion blockchain features on almost any platform. ",
+			"",
+			":fire: *Decentralized Exchanges - (2021Q3)*",
+			"Atomic Swap support and Blocknet DEX integration are important checkpoints in our journey. After that we'll look into developing Wrapped ONION (wONION) for Uniswap DEX. "
 		]
 	}
 }
