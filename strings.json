@@ -7,7 +7,8 @@
 	},
 	"welcome_new":{
 		"en":[
-			"Hello {0}, welcome to DeepOnion!"
+			"Hello {0}, welcome to DeepOnion!",
+			":arrow_down: Use the buttons to discover DeepOnion. :arrow_down:"
 		]
 	},
 	"help": {
@@ -94,8 +95,13 @@
 	},
 	"button_roadmap": {
 		"en":[
-			" :star: Roadmap"
+			":star: Roadmap"
 		]
+	},
+	"button_forum": {
+		"en":[
+			":eight_spoked_asterisk: Forum"
+		]	
 	},
 	"about": {
 		"en": [
@@ -297,19 +303,30 @@
 		"en":[
 			"*You can buy and sell ONIONs on following exchanges:*",
 			"",
+			"*No KYC*",
+			"",
 			":arrow_forward: TradeOgre: [ONION/BTC](https://tradeogre.com/exchange/BTC-ONION)",
 			"",
 			":arrow_forward: SouthXchange: [ONION/BTC](https://main.southxchange.com/Market/Book/ONION/BTC), [ONION/LTC](https://main.southxchange.com/Market/Book/ONION/LTC)",
 			"",
-			":arrow_forward: Citex: [ONION/BTC](https://trade.citex.co.kr/trade/ONION\\_BTC), [ONION/USDT](https://trade.citex.co.kr/trade/ONION\\_USDT)",
-			"",
-			":arrow_forward: Coinsbit: [ONION/BTC](https://coinsbit.io/trade/ONION\\_BTC),  [ONION/USDT](https://coinsbit.io/trade/ONION\\_USDT)",
-			"",
-			":arrow_forward: Crex: [ONION/BTC](https://crex24.com/nl/exchange/ONION-BTC), [ONION/USDPM](https://crex24.com/exchange/ONION-USDPM), [ONION/EURPM](https://crex24.com/exchange/ONION-EURPM), [ONION/RUB](https://crex24.com/exchange/ONION-RUB)",
-			"",
 			":arrow_forward: Bitexlive: [ONION/BTC](https://bitexlive.com/exchange/BTC-ONION)",
 			"",
-			":arrow_forward: Stex: [ONION/BTC](https://app.stex.com/en/basic-trade/pair/BTC/ONION/)"
+			":arrow_forward: StakeCube: [ONION/BTC](https://stakecube.net/app/exchange/onion_btc)",
+			"-------",
+			"",
+			"*KYC depending on user location*",
+			"",
+			":arrow_forward: Citex: [ONION/BTC](https://trade.citex.co.kr/trade/ONION\\_BTC), [ONION/USDT](https://trade.citex.co.kr/trade/ONION\\_USDT)",
+			"",
+			":arrow_forward: Crex24: [ONION/BTC](https://crex24.com/exchange/ONION-BTC), [ONION/USDPM](https://crex24.com/exchange/ONION-USDPM), [ONION/EURPM](https://crex24.com/exchange/ONION-EURPM), [ONION/RUB](https://crex24.com/exchange/ONION-RUB)",
+			"",
+			":arrow_forward: Stex: [ONION/BTC](https://app.stex.com/en/basic-trade/pair/BTC/ONION/)",
+			"-------",
+			"",
+			"*Worldwide KYC*",
+			"",
+			":arrow_forward: Coinsbit: [ONION/BTC](https://coinsbit.io/trade/ONION\\_BTC),  [ONION/USDT](https://coinsbit.io/trade/ONION\\_USDT)",
+			""
 		]
 	},
 	"feature_list": {
@@ -332,6 +349,8 @@
 			" :arrow_forward: [Learn more about DeepVault](https://deeponion.org/#deepvault)",
 			"",
 			"Are you still not convinced?",
+			"Join our Forum: https://deeponion.org/community/",
+			"",
 			"- Read more about our other features:",
 			":boom: VoteCentral",
 			":boom: Stealth-Addresses",

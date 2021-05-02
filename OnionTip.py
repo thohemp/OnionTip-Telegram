@@ -1504,7 +1504,7 @@ def welcome(update: Update, context: CallbackContext):
             url="https://telegram.me/%s?start=roadmap" % context.bot.username,
         )
         _markup = InlineKeyboardMarkup(
-            [[_button_feature, _button_roadmap, _button_exchange,]]
+            [[_button_feature, _button_roadmap, _button_exchange]]
         )
         context.bot.send_message(
             chat_id= update.message.chat_id,
