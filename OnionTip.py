@@ -16,6 +16,8 @@ logging.basicConfig(level=logging.INFO,
                     )
 
 
+deeponion_chat_id = '-1001488620684'
+
 config = load_file_json("config.json")
 _lang = "en"  # ToDo: Per-user language
 strings = Strings("strings.json")
@@ -1486,9 +1488,10 @@ def roadmap(update: Update, context: CallbackContext):
         )
 
 def welcome(update: Update, context: CallbackContext):
-    do_chat = -1001488620684
-    if not update.message.chat.id == do_chat: # Only welcome in DeepOnion main group
+    chat_id = str(update.message.chat.id)
+    if not chat_id == deeponion_chat_id: 
         return
+
     for new_user_obj in update.message.new_chat_members:
         new_user =new_user_obj.name
         _button_exchange = InlineKeyboardButton(
