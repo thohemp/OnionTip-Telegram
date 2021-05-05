@@ -8,7 +8,7 @@
 	"welcome_new":{
 		"en":[
 			"Hello {0}, welcome to DeepOnion!",
-			":arrow_down: Use the buttons to discover DeepOnion. :arrow_down:"
+			"Use the buttons below for more information. :arrow_down:"
 		]
 	},
 	"help": {
