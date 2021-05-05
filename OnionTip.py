@@ -1486,6 +1486,10 @@ def roadmap(update: Update, context: CallbackContext):
         )
 
 def welcome(update: Update, context: CallbackContext):
+    do_chat = "-1001488620684"
+    if not update.message.chat_id == do_chat: # Only welcome in DeepOnion main group
+        return
+
     for new_user_obj in update.message.new_chat_members:
         new_user =new_user_obj.name
         _button_exchange = InlineKeyboardButton(
